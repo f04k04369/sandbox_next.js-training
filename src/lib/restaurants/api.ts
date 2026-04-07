@@ -1,6 +1,9 @@
-export async function fetchRamenRestaurants() {
+import { error } from "console";
+import { unstable_cache } from "next/cache";
+
+const fetchRamenRestaurantsInner = async () => {
     const url = "https://places.googleapis.com/v1/places:searchNearby";
-    
+
     const apiKey = process.env.GOOGLE_API_KEY
 
     const header = {
@@ -10,25 +13,38 @@ export async function fetchRamenRestaurants() {
     }
 
     const requestBody = {
-        // "includedTypes": ["restaurant"],
+        "includedPrimaryTypes": ["ramen_restaurant"],
         "maxResultCount": 10,
         "locationRestriction": {
             "circle": {
             "center": {
-                "latitude": 37.7937,
-                "longitude": -122.3965},
-            "radius": 500.0
+                "latitude": 34.2895631,//香川
+                "longitude": 134.0473344},
+            "radius": 10000.0
             }
         },
-        languageCode:"ja"
+        languageCode:"ja",
+        rankPreference: "DISTANCE",
     }
 
     const response = await fetch(url, {
         method: "POST",
         body: JSON.stringify(requestBody),
-        headers: header
+        headers: header,
+        next: {revalidate: 86400}
     });
 
-    const data = await response.json();
-    console.log(data);
-}
+    if(!response.ok){
+        const errorData = response.json();
+        console.error(errorData);
+        return {error: `NearbySearchリクエスト失敗:${response.status}`}
+    }
+
+    return response.json();
+};
+
+export const fetchRamenRestaurants = unstable_cache(
+    fetchRamenRestaurantsInner,
+    ["ramen-restaurants"],
+    { revalidate: 86400 }
+);
