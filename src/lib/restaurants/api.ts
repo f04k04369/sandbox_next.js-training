@@ -3,7 +3,7 @@ import { error } from "console";
 import { unstable_cache } from "next/cache";
 import { transformPlaceResults } from "./utils";
 
-const fetchRamenRestaurantsInner = async () => {
+export const fetchRamenRestaurantsInner = async () => {
     const url = "https://places.googleapis.com/v1/places:searchNearby";
 
     const apiKey = process.env.GOOGLE_API_KEY
@@ -50,7 +50,8 @@ const fetchRamenRestaurantsInner = async () => {
 
     
 
-    transformPlaceResults(nearbyRamenPlaces);
+   const RamenRestaurants = await transformPlaceResults(nearbyRamenPlaces);
+   console.log(RamenRestaurants)
 };
 
 export const fetchRamenRestaurants = unstable_cache(
@@ -58,3 +59,11 @@ export const fetchRamenRestaurants = unstable_cache(
     ["ramen-restaurants"],
     { revalidate: 86400 }
 );
+
+export async function getPhotoUrl(name: string, maxWidth = 400){
+    "use cache";
+    console.log("getPhotoUrl実行");
+    const apiKey = process.env.GOOGLE_API_KEY;
+    const url = `https://places.googleapis.com/v1/${name}/media?key=${apiKey}&maxWidthPx=${maxWidth}`;
+    return url;
+}

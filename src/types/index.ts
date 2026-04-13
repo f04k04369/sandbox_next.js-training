@@ -1,3 +1,10 @@
+export interface Restaurant {
+    id: string,
+    restaurantName?: string,
+    primaryType?: string,
+    photoUrl?: string
+}
+
 export interface GooglePlacesSearchApiResponse {
     places?: PlaceSearchResult[];
 }

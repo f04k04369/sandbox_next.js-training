@@ -1,12 +1,20 @@
 import Link from "next/link";
-import React from "react";
+import React, { Suspense } from "react";
 import MenuSheet from "./menu-sheet";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 function Header() {
   return (
     <header className="bg-background h-16 fixed top-0 left-0 w-full">
       <div className="flex items-center  h-full space-x-4 px-4 max-w-[1920px] mx-auto">
-        <MenuSheet /> 
+        <Suspense fallback={
+          <Button variant={"ghost"} size={"icon"} disabled>
+            <Menu />
+          </Button>
+        }>
+          <MenuSheet />
+        </Suspense>
         <div className="font-bold">
           <Link href={"/"}>Delivery APP</Link>
         </div>
