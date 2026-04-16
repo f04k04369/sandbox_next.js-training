@@ -1,18 +1,28 @@
 import CarouselContainer from "@/components/carousel-container";
 import RestaurantCard from "@/components/restaurant-card";
 import Section from "@/components/section";
-import { fetchRamenRestaurants } from "@/lib/restaurants/api";
+import { fetchRamenRestaurants, fetchRestaurants } from "@/lib/restaurants/api";
 import Image from "next/image";
 
 export default async function Home() {
-  await fetchRamenRestaurants();
+  const {data: nerarybyRamenRestaurants, error: nerarybyRamenRestaurantsError} = await fetchRamenRestaurants();
+  const {data: nerarbyRestaurants, error: nerarbyRestaurantsError} = await fetchRestaurants();
+
   return (
-    <Section title="近くのお店">
+    <>
+    {!nerarybyRamenRestaurants ? (
+      <p>{nerarybyRamenRestaurantsError}</p>
+    ): nerarybyRamenRestaurants.length > 0 ? (
+      <Section title="近くのラーメン店">
       <CarouselContainer slideToShow={4}>
-        {Array.from({length:5}).map((_, index) => (
-          <RestaurantCard key={index}/>
+        {nerarybyRamenRestaurants.map((restaurant, index) => (
+          <RestaurantCard key={index} restaurant={restaurant}/>
         ))}
       </CarouselContainer>
     </Section>
+    ): (
+      <p>近くにラーメン店がありません</p>
+    )}
+        </>
   );
 }

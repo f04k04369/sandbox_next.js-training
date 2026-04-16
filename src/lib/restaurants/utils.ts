@@ -10,7 +10,7 @@ export async function transformPlaceResults(restaurants:PlaceSearchResult[]){
             restaurantName: restaurant.displayName?.text,
             primaryType: restaurant.primaryType,
             // photoUrl: restaurant.photos?.[0]?.name ? await getPhotoUrl(restaurant.photos[0].name) : "/no_image.png"
-            photoUrl: "/no_image.png",
+            photoUrl: "/test-img.png",
         }
     ));
 
