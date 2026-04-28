@@ -2,8 +2,14 @@ import React from 'react'
 import CarouselContainer from './carousel-container';
 import Category from './category';
 
+export interface CategoryType {
+    categoryName: string;
+    type: string;
+    imageUrl: string;
+}
+
 export default function Categories() {
-      const categories = [
+      const categories: CategoryType[] = [
     {
       categoryName: "ファーストフード",
       type: "fast_food_restaurant",
@@ -68,7 +74,7 @@ export default function Categories() {
     return (
         <CarouselContainer slideToShow={10}>
             {categories.map((category) => (
-                <Category />
+                <Category category={category} />
             ))}
         </CarouselContainer>
   )
