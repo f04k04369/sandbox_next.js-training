@@ -1,3 +1,5 @@
+"use client"
+
 import React from 'react'
 import CarouselContainer from './carousel-container';
 import Category from './category';
@@ -69,12 +71,16 @@ export default function Categories() {
       type: "indian_restaurant",
       imageUrl: "/images/categories/インド料理.png",
     },
-  ];
+    ];
+
+    const searchRestaurantsOfCategory = (category: string) => {
+      console.log(category)
+    };
 
     return (
         <CarouselContainer slideToShow={10}>
             {categories.map((category) => (
-                <Category category={category} />
+                <Category category={category} onClick={searchRestaurantsOfCategory}/>
             ))}
         </CarouselContainer>
   )
