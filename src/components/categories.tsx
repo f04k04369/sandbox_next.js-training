@@ -3,6 +3,7 @@
 import React from 'react'
 import CarouselContainer from './carousel-container';
 import Category from './category';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export interface CategoryType {
     categoryName: string;
@@ -11,7 +12,7 @@ export interface CategoryType {
 }
 
 export default function Categories() {
-      const categories: CategoryType[] = [
+    const categories: CategoryType[] = [
     {
       categoryName: "ファーストフード",
       type: "fast_food_restaurant",
@@ -72,8 +73,13 @@ export default function Categories() {
       imageUrl: "/images/categories/インド料理.png",
     },
     ];
-
+    
+    const searchParams = useSearchParams();
+    const router = useRouter();
     const searchRestaurantsOfCategory = (category: string) => {
+      const params = new URLSearchParams(searchParams);
+      params.set("category", category);
+      router.replace(`/search?${params.toString()}`)
       console.log(category)
     };
 
