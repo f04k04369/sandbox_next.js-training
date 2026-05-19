@@ -3,6 +3,7 @@ import React, { Suspense } from "react";
 import MenuSheet from "./menu-sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
+import PlaceSearchBar from "./place-search-bar";
 
 function Header() {
   return (
@@ -19,7 +20,9 @@ function Header() {
           <Link href={"/"}>Delivery APP</Link>
         </div>
         <div>住所を選択</div>
-        <div className="flex-1 bg-yellow-200">検索バー</div>
+        <div className="flex-1">
+          <PlaceSearchBar />
+        </div>
         <div>カート</div>
       </div>
       </header>
