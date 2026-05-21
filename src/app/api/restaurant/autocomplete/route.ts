@@ -53,7 +53,10 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       const errorData = response.json();
       console.error(errorData);
-      return { error: `AutoCompleteリクエスト失敗:${response.status}` };
+      return NextResponse.json(
+        { error: `Autocompleteリクエスト失敗:${response.status}` },
+        { status: 500}
+    )
     }
     const data: GooglePlacesAutoCompleteApiResponse = await response.json();
     console.log("data", JSON.stringify(data, null, 2));
