@@ -7,10 +7,10 @@ export async function GET(request: NextRequest) {
   const sessionToken = searchParams.get("sessionToken");
 
   if (!input) {
-    NextResponse.json({ error: "文字を入力してください" }, { status: 400 });
+    return NextResponse.json({ error: "文字を入力してください" }, { status: 400 });
   }
   if (!sessionToken) {
-    NextResponse.json(
+    return NextResponse.json(
       { error: "セッショントークンが必要です" },
       { status: 400 },
     );

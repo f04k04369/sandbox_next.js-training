@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 
@@ -11,7 +11,13 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { RestaurantSuggestion } from "@/types";
-import { AlertCircle, LoaderCircle, MapPinIcon, SearchIcon } from "lucide-react";
+import {
+  AlertCircle,
+  LoaderCircle,
+  MapPinIcon,
+  SearchIcon,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function PlaceSearchBar() {
   const [open, setOpen] = useState(false);
@@ -21,6 +27,9 @@ export default function PlaceSearchBar() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const clickedOnItem = useRef(false);
+  const router = useRouter();
+
   const fetchSuggestions = useDebouncedCallback(async (input: string) => {
     if (!input.trim()) {
       setSuggestions([]);
@@ -58,7 +67,12 @@ export default function PlaceSearchBar() {
     setOpen(true);
     fetchSuggestions(inputText);
   }, [inputText]);
+
   const handleBlur = () => {
+    if (clickedOnItem.current) {
+      clickedOnItem.current = false;
+      return;
+    }
     setOpen(false);
   };
   const handleFocus = () => {
@@ -67,8 +81,31 @@ export default function PlaceSearchBar() {
     }
   };
 
+  const handleSelectSuggestion = (suggestion: RestaurantSuggestion) => {
+    console.log("suggestion", suggestion);
+    setOpen(false);
+
+    if (suggestion.type === "placePrediction") {
+      if (suggestion.placeId) {
+        router.push(
+          `/restaurant/${suggestion.placeId}?sessionToken=${sessionToken}`,
+        );
+      }
+    } else {
+      // 検索結果ページに移動
+      router.push(`/search?restaurant=${encodeURIComponent(suggestion.query)}`);
+    }
+  };
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if(!inputText.trim()) return;
+    if(e.key === "Enter") {
+      router.push(`/search?restaurant=${inputText}`);
+    }
+  }
+
   return (
-    <Command className="overflow-visible bg-muted" shouldFilter={false}>
+    <Command onKeyDown={handleKeyDown} className="overflow-visible bg-muted" shouldFilter={false}>
       <CommandInput
         value={inputText}
         placeholder="Type a command or search..."
@@ -92,7 +129,6 @@ export default function PlaceSearchBar() {
                 ) : (
                   "レストランが見つかりません"
                 )}
-              
               </div>
             </CommandEmpty>
             {suggestions.map((suggestion, index) => {
@@ -106,7 +142,16 @@ export default function PlaceSearchBar() {
                   : suggestion.query;
 
               return (
-                <CommandItem key={value} value={value} className="p-5">
+                <CommandItem
+                  key={value}
+                  value={value}
+                  className="p-5"
+                  onSelect={() => handleSelectSuggestion(suggestion)}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    clickedOnItem.current = true
+                  }}
+                  >
                   {suggestion.type === "queryPrediction" ? (
                     <SearchIcon />
                   ) : (
