@@ -4,6 +4,7 @@ import MenuSheet from "./menu-sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import PlaceSearchBar from "./place-search-bar";
+import AddressModal from "./address-modal";
 
 function Header() {
   return (
@@ -19,7 +20,7 @@ function Header() {
         <div className="font-bold">
           <Link href={"/"}>Delivery APP</Link>
         </div>
-        <div>住所を選択</div>
+        <AddressModal />
         <div className="flex-1">
           <Suspense fallback={<div className="h-9 rounded-md bg-muted animate-pulse" />}>
             <PlaceSearchBar />
