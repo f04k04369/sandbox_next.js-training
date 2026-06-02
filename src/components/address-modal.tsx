@@ -78,7 +78,8 @@ export default function AddressModal() {
       setSessionToken(uuidv4());
 
     } catch (error) {
-      "予期せぬエラーが発生しました"
+      console.error(error);
+      alert("予期せぬエラーが発生しました");
     }
     // serverActions呼び出し
     

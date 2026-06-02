@@ -5,7 +5,7 @@ export async function fetchRestaurants() {
   "use cache";
   const url = "https://places.googleapis.com/v1/places:searchNearby";
 
-  const apiKey = process.env.GOOGLE_API_KEY;
+  const apiKey = "process.env.GOOGLE_API_KEY";
 
   const header = {
     "Content-Type": "application/json",
@@ -255,6 +255,8 @@ export async function getPlaceDetails(
 
     const fieldsParam = fields.join(",");
     
+    throw new Error("getPlaceDetailsえらー");
+
     let url:string;
 
     if (sessionToken){
