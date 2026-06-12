@@ -75,5 +75,5 @@ export interface PlaceDetailsAll {
   location?: {
     latitude?: number;
     longitude?: number;
-  }
+  };
 }

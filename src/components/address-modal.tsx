@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from "uuid";
 import { AddressSuggestion } from "@/types";
 import { AlertCircle, LoaderCircle, MapPin } from "lucide-react";
 import { selectSuggestionAction } from "@/app/(private)/actions/addressActions";
+import useSWR from "swr";
 
 export default function AddressModal() {
   const [inputText, setInputText] = useState("");
@@ -30,8 +31,7 @@ export default function AddressModal() {
   useEffect(() => {
     setSessionToken(uuidv4());
   }, []);
-  
-  
+
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -71,19 +71,23 @@ export default function AddressModal() {
     setIsLoading(true);
     fetchSuggestions(inputText);
   }, [inputText, sessionToken]);
-  
+
+  const fetcher = (url:string) => fetch(url).then((res) => res.json());
+
+  const { data, error, isLoading:loading } = useSWR(`/api/address`, fetcher);
+  if (error) return <div>failed to load</div>;
+  if (isLoading) return <div>loading...</div>;
+
   const handleSelectSuggestion = async (suggestion: AddressSuggestion) => {
     try {
-      await selectSuggestionAction(suggestion, sessionToken );
+      await selectSuggestionAction(suggestion, sessionToken);
       setSessionToken(uuidv4());
-
     } catch (error) {
       console.error(error);
       alert("予期せぬエラーが発生しました");
     }
     // serverActions呼び出し
-    
-  }
+  };
 
   return (
     <Dialog>
@@ -121,7 +125,11 @@ export default function AddressModal() {
                   </div>
                 </CommandEmpty>
                 {suggestions.map((suggestion) => (
-                  <CommandItem onSelect={() => handleSelectSuggestion(suggestion)} key={suggestion.placeId} className="p-5">
+                  <CommandItem
+                    onSelect={() => handleSelectSuggestion(suggestion)}
+                    key={suggestion.placeId}
+                    className="p-5"
+                  >
                     <MapPin />
                     <div>
                       <p className="font-bold">{suggestion.placeName}</p>
@@ -133,7 +141,7 @@ export default function AddressModal() {
                 ))}
               </>
             ) : (
-            // 登録済み住所
+              // 登録済み住所
               <>
                 <h3 className="text-lg font-bold mb-2">保存済みの住所</h3>
                 <CommandItem className="p-5">Calendar</CommandItem>

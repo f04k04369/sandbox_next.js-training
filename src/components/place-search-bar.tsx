@@ -101,7 +101,7 @@ export default function PlaceSearchBar() {
       );
     }
   };
-  
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== "Enter") return;
     setOpen(false);
@@ -111,9 +111,7 @@ export default function PlaceSearchBar() {
       return;
     }
 
-    router.push(
-      `/search?restaurant=${encodeURIComponent(inputText.trim())}`,
-    );
+    router.push(`/search?restaurant=${encodeURIComponent(inputText.trim())}`);
   };
 
   return (
@@ -162,9 +160,9 @@ export default function PlaceSearchBar() {
                   onSelect={() => handleSelectSuggestion(suggestion)}
                   onMouseDown={(e) => {
                     e.preventDefault();
-                    clickedOnItem.current = true
+                    clickedOnItem.current = true;
                   }}
-                  >
+                >
                   {suggestion.type === "queryPrediction" ? (
                     <SearchIcon />
                   ) : (

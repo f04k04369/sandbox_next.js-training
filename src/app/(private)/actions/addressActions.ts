@@ -9,7 +9,7 @@ export async function selectSuggestionAction(
   sessionToken: string,
 ) {
   const supabase = await createClient();
-  throw new Error("getPlaceDetailsえらー");
+  // throw new Error("getPlaceDetailsえらー");
   console.log("selectSuggestionAction", suggestion);
 
   const { data: locationData, error } = await getPlaceDetails(
@@ -31,22 +31,38 @@ export async function selectSuggestionAction(
     data: { user },
     error: userError,
   } = await supabase.auth.getUser();
-  
-  if(userError || !user) {
+
+  if (userError || !user) {
     redirect("/login");
   }
-    // データベースに保存処理
+  // データベースに保存処理
 
-    const { error: insertError } = await supabase.from("addresses").insert({
-        name: suggestion.placeName,
-        address_text: suggestion.address_text,
-        latitude: locationData?.location?.latitude,
-        longitude: locationData?.location?.longitude,
-        user_id: user.id,
-    });
+  const { data: newAddress, error: insertError } = await supabase
+    .from("addresses")
+    .insert({
+      name: suggestion.placeName,
+      address_text: suggestion.address_text,
+      latitude: locationData?.location?.latitude,
+      longitude: locationData?.location?.longitude,
+      user_id: user.id,
+    })
+    .select("id")
+    .single();
 
-    if(insertError) {
-        console.error("住所の保存に失敗しました",insertError);
-        throw new Error("住所の保存に失敗しました");
-    }
+  if (insertError) {
+    console.error("住所の保存に失敗しました", insertError);
+    throw new Error("住所の保存に失敗しました");
+  }
+
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({
+      selected_address_id: newAddress.id,
+    })
+    .eq("id", user.id);
+
+  if (updateError) {
+    console.error("プロフィールの更新に失敗しました。", updateError);
+    throw new Error("プロフィールの更新に失敗しました。");
+  }
 }
