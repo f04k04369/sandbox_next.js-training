@@ -75,6 +75,9 @@ export default function AddressModal() {
   const fetcher = (url:string) => fetch(url).then((res) => res.json());
 
   const { data, error, isLoading:loading } = useSWR(`/api/address`, fetcher);
+  
+  console.log("swrdata", data);
+
   if (error) return <div>failed to load</div>;
   if (isLoading) return <div>loading...</div>;
 
