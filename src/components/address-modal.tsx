@@ -19,10 +19,15 @@ import {
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
-import { AddressSuggestion } from "@/types";
+import { Address, AddressSuggestion } from "@/types";
 import { AlertCircle, LoaderCircle, MapPin } from "lucide-react";
 import { selectSuggestionAction } from "@/app/(private)/actions/addressActions";
 import useSWR from "swr";
+
+interface AddressResponse {
+  addressList: Address[];
+  selectedAddress: Address;
+}
 
 export default function AddressModal() {
   const [inputText, setInputText] = useState("");
@@ -72,10 +77,14 @@ export default function AddressModal() {
     fetchSuggestions(inputText);
   }, [inputText, sessionToken]);
 
-  const fetcher = (url:string) => fetch(url).then((res) => res.json());
+  const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-  const { data, error, isLoading:loading } = useSWR(`/api/address`, fetcher);
-  
+  const {
+    data,
+    error,
+    isLoading: loading,
+  } = useSWR<AddressResponse>(`/api/address`, fetcher);
+
   console.log("swrdata", data);
 
   if (error) return <div>failed to load</div>;
@@ -147,9 +156,14 @@ export default function AddressModal() {
               // 登録済み住所
               <>
                 <h3 className="text-lg font-bold mb-2">保存済みの住所</h3>
-                <CommandItem className="p-5">Calendar</CommandItem>
-                <CommandItem className="p-5">Search Emoji</CommandItem>
-                <CommandItem className="p-5">Calculator</CommandItem>
+                {data?.addressList.map((address) => (
+                  <CommandItem key={address.id} className="p-5">
+                    <div>
+                      <p className="font-bold">{address.name}</p>
+                      <p>{address.address_text}</p>
+                    </div>
+                  </CommandItem>
+                ))}
               </>
             )}
           </CommandList>

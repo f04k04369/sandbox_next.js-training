@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { Address } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -71,12 +72,4 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
-}
-
-interface Address {
-  id: number;
-  name: string;
-  address_text: string;
-  latitude: number;
-  longitude: number;
 }
