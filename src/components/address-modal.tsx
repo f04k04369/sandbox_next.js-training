@@ -22,7 +22,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Address, AddressSuggestion } from "@/types";
 import { AlertCircle, LoaderCircle, MapPin } from "lucide-react";
 import { selectSuggestionAction } from "@/app/(private)/actions/addressActions";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 
 interface AddressResponse {
   addressList: Address[];
@@ -77,7 +77,19 @@ export default function AddressModal() {
     fetchSuggestions(inputText);
   }, [inputText, sessionToken]);
 
-  const fetcher = (url: string) => fetch(url).then((res) => res.json());
+  const fetcher = async (url: string) => {
+    const response = await fetch(url);
+    
+    if(!response.ok) {
+      const errorData = await response.json();
+      
+      throw new Error(errorData.error);
+    }
+
+    const data = await response.json();
+    
+    return data;
+  };
 
   const {
     data,
@@ -88,17 +100,21 @@ export default function AddressModal() {
 
   console.log("swrdata", data);
 
-  if (error) return <div>failed to load</div>;
+  if (error) {
+    console.error("error", error);
+    return <div>{error.message}</div>
+  }
+
   if (loading) return <div>loading...</div>;
 
   const handleSelectSuggestion = async (suggestion: AddressSuggestion) => {
     try {
       await selectSuggestionAction(suggestion, sessionToken);
       setSessionToken(uuidv4());
-      
+
       setInputText("");
-      
-      mutate()
+
+      mutate();
     } catch (error) {
       console.error(error);
       alert("予期せぬエラーが発生しました");
@@ -108,7 +124,9 @@ export default function AddressModal() {
 
   return (
     <Dialog>
-      <DialogTrigger>住所を選択</DialogTrigger>
+      <DialogTrigger>
+        {data?.selectedAddress ? data.selectedAddress.name : "住所を選択"}
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>住所</DialogTitle>
