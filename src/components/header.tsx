@@ -22,7 +22,13 @@ function Header() {
         <div className="font-bold">
           <Link href={"/"}>Delivery APP</Link>
         </div>
-        <AddressModal />
+        <Suspense
+          fallback={
+            <span className="text-sm text-muted-foreground">住所を読み込み中…</span>
+          }
+        >
+          <AddressModal />
+        </Suspense>
         <div className="flex-1">
           <Suspense
             fallback={<div className="h-9 rounded-md bg-muted animate-pulse" />}

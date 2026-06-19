@@ -66,3 +66,26 @@ export async function selectSuggestionAction(
     throw new Error("プロフィールの更新に失敗しました。");
   }
 }
+
+export async function selectAddressAction(addressId: number) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    redirect("/login");
+  }
+
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({ selected_address_id: addressId })
+    .eq("id", user.id);
+
+  if (updateError) {
+    console.error("住所の選択に失敗しました", updateError);
+    throw new Error("住所の選択に失敗しました");
+  }
+}

@@ -41,25 +41,24 @@ export async function GET(request: NextRequest) {
     addressList = addressData;
 
     // 選択中の住所情報をテーブルから取得
-    const { data: selectedAddressData, error: selectedAddressDataError } =
-      await supabase
-        .from("profiles")
-        .select("addresses(id,name,address_text,latitude,longitude)")
-        .eq("id", user.id)
-        .single();
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("selected_address_id")
+      .eq("id", user.id)
+      .single();
 
-    if (selectedAddressDataError) {
-      console.error(
-        "プロフィールの取得に失敗しました",
-        selectedAddressDataError,
-      );
+    if (profileError) {
+      console.error("プロフィールの取得に失敗しました", profileError);
       return NextResponse.json(
         { error: "プロフィールの取得に失敗しました" },
         { status: 500 },
       );
     }
 
-    selectedAddress = selectedAddressData.addresses?.[0] ?? null;
+    selectedAddress =
+      addressList.find(
+        (address) => address.id === profileData.selected_address_id,
+      ) ?? null;
     
     console.log("addressList", addressList);
     console.log("selectedAddress", selectedAddress);

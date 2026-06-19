@@ -21,12 +21,16 @@ import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 import { Address, AddressSuggestion } from "@/types";
 import { AlertCircle, LoaderCircle, MapPin } from "lucide-react";
-import { selectSuggestionAction } from "@/app/(private)/actions/addressActions";
+import {
+  selectAddressAction,
+  selectSuggestionAction,
+} from "@/app/(private)/actions/addressActions";
 import useSWR from "swr";
+import { cn } from "@/lib/utils";
 
 interface AddressResponse {
   addressList: Address[];
-  selectedAddress: Address;
+  selectedAddress: Address | null;
 }
 
 export default function AddressModal() {
@@ -41,6 +45,8 @@ export default function AddressModal() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
   const fetchSuggestions = useDebouncedCallback(async (input: string) => {
     if (!input.trim() || !sessionToken) {
       setSuggestions([]);
@@ -78,16 +84,16 @@ export default function AddressModal() {
   }, [inputText, sessionToken]);
 
   const fetcher = async (url: string) => {
-    const response = await fetch(url);
-    
-    if(!response.ok) {
+    const response = await fetch(url, { cache: "no-store" });
+
+    if (!response.ok) {
       const errorData = await response.json();
-      
+
       throw new Error(errorData.error);
     }
 
     const data = await response.json();
-    
+
     return data;
   };
 
@@ -102,10 +108,13 @@ export default function AddressModal() {
 
   if (error) {
     console.error("error", error);
-    return <div>{error.message}</div>
   }
 
-  if (loading) return <div>loading...</div>;
+  const triggerLabel = loading
+    ? "読み込み中..."
+    : error
+      ? "住所を取得できません"
+      : (data?.selectedAddress?.name ?? "住所を選択");
 
   const handleSelectSuggestion = async (suggestion: AddressSuggestion) => {
     try {
@@ -114,7 +123,7 @@ export default function AddressModal() {
 
       setInputText("");
 
-      mutate();
+      await mutate();
     } catch (error) {
       console.error(error);
       alert("予期せぬエラーが発生しました");
@@ -122,11 +131,27 @@ export default function AddressModal() {
     // serverActions呼び出し
   };
 
+  const handleSelectAddress = async (address: Address) => {
+    console.log("address", address);
+    try {
+      await selectAddressAction(address.id);
+      await mutate(
+        (current) =>
+          current
+            ? { ...current, selectedAddress: address }
+            : { addressList: [address], selectedAddress: address },
+        { revalidate: true },
+      );
+      setOpen(false);
+    } catch (error) {
+      console.error(error);
+      alert("予期せぬエラーが発生しました");
+    }
+  };
+
   return (
-    <Dialog>
-      <DialogTrigger>
-        {data?.selectedAddress ? data.selectedAddress.name : "住所を選択"}
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger>{triggerLabel}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>住所</DialogTitle>
@@ -180,7 +205,14 @@ export default function AddressModal() {
               <>
                 <h3 className="text-lg font-bold mb-2">保存済みの住所</h3>
                 {data?.addressList.map((address) => (
-                  <CommandItem key={address.id} className="p-5">
+                  <CommandItem
+                    key={address.id}
+                    onSelect={() => handleSelectAddress(address)}
+                    className={cn(
+                      "p-5",
+                      address.id === data?.selectedAddress?.id && "bg-muted",
+                    )}
+                  >
                     <div>
                       <p className="font-bold">{address.name}</p>
                       <p>{address.address_text}</p>
