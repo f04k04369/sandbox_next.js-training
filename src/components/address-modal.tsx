@@ -20,13 +20,14 @@ import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 import { Address, AddressSuggestion } from "@/types";
-import { AlertCircle, LoaderCircle, MapPin } from "lucide-react";
+import { AlertCircle, LoaderCircle, MapPin, Trash2 } from "lucide-react";
 import {
   selectAddressAction,
   selectSuggestionAction,
 } from "@/app/(private)/actions/addressActions";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
 
 interface AddressResponse {
   addressList: Address[];
@@ -132,7 +133,7 @@ export default function AddressModal() {
   };
 
   const handleSelectAddress = async (address: Address) => {
-    console.log("address", address);
+    alert("address");
     try {
       await selectAddressAction(address.id);
       await mutate(
@@ -143,6 +144,18 @@ export default function AddressModal() {
         { revalidate: true },
       );
       setOpen(false);
+    } catch (error) {
+      console.error(error);
+      alert("予期せぬエラーが発生しました");
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: number) => {
+    console.log("addressId", addressId);
+    const ok = window.confirm("住所を削除しますか？");
+    if (!ok) return;
+    try {
+      await deleteAddressAction(addressId);
     } catch (error) {
       console.error(error);
       alert("予期せぬエラーが発生しました");
@@ -209,7 +222,7 @@ export default function AddressModal() {
                     key={address.id}
                     onSelect={() => handleSelectAddress(address)}
                     className={cn(
-                      "p-5",
+                      "p-5 justify-between items-center",
                       address.id === data?.selectedAddress?.id && "bg-muted",
                     )}
                   >
@@ -217,6 +230,16 @@ export default function AddressModal() {
                       <p className="font-bold">{address.name}</p>
                       <p>{address.address_text}</p>
                     </div>
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteAddress(address.id);
+                      }}
+                      size={"icon"}
+                      variant={"ghost"}
+                    >
+                      <Trash2 />
+                    </Button>
                   </CommandItem>
                 ))}
               </>
