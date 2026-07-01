@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Address, AddressSuggestion } from "@/types";
 import { AlertCircle, LoaderCircle, MapPin, Trash2 } from "lucide-react";
 import {
+  deleteAddressAction,
   selectAddressAction,
   selectSuggestionAction,
 } from "@/app/(private)/actions/addressActions";
@@ -156,6 +157,7 @@ export default function AddressModal() {
     if (!ok) return;
     try {
       await deleteAddressAction(addressId);
+      mutate();
     } catch (error) {
       console.error(error);
       alert("予期せぬエラーが発生しました");

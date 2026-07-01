@@ -89,3 +89,30 @@ export async function selectAddressAction(addressId: number) {
     throw new Error("住所の選択に失敗しました");
   }
 }
+
+export async function deleteAddressAction(addressId: number) {
+  console.log("serveractionsaddressid", addressId);
+
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    redirect("/login");
+  }
+
+  // 削除処理実装
+  const { error: deleteError } = await supabase
+    .from("addresses")
+    .delete()
+    .eq("id", addressId)
+    .eq("user_id", user.id);
+
+    if(deleteError) {
+     console.error("選択中の削除に失敗しました。", deleteError);
+     throw new Error("選択中の削除に失敗しました。");  
+    }
+}
