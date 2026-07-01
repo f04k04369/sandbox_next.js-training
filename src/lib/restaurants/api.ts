@@ -1,5 +1,11 @@
-import { GooglePlacesDetailsApiResponse, GooglePlacesSearchApiResponse, PlaceDetailsAll } from "@/types";
+import {
+  GooglePlacesDetailsApiResponse,
+  GooglePlacesSearchApiResponse,
+  PlaceDetailsAll,
+} from "@/types";
 import { transformPlaceResults } from "./utils";
+import { createClient } from "../supabase/server";
+import { redirect } from "next/navigation";
 
 export async function fetchRestaurants() {
   "use cache";
@@ -251,28 +257,25 @@ export async function getPlaceDetails(
   fields: string[],
   sessionToken?: string,
 ) {
-    console.log("getPlaceDetails", placeId, fields, sessionToken);
+  console.log("getPlaceDetails", placeId, fields, sessionToken);
 
-    const fieldsParam = fields.join(",");
-    
+  const fieldsParam = fields.join(",");
 
-    let url:string;
+  let url: string;
 
-    if (sessionToken){
-      url = `https://places.googleapis.com/v1/places/${placeId}?sessionToken=${sessionToken}&languageCode=ja`
-    } else {
-      url = `https://places.googleapis.com/v1/places/${placeId}?languageCode=ja`
-    }
-      
+  if (sessionToken) {
+    url = `https://places.googleapis.com/v1/places/${placeId}?sessionToken=${sessionToken}&languageCode=ja`;
+  } else {
+    url = `https://places.googleapis.com/v1/places/${placeId}?languageCode=ja`;
+  }
 
   const apiKey = process.env.GOOGLE_API_KEY;
 
   const header = {
     "Content-Type": "application/json",
     "X-Goog-Api-Key": apiKey!,
-    "X-Goog-FieldMask": fieldsParam, 
+    "X-Goog-FieldMask": fieldsParam,
   };
-
 
   const response = await fetch(url, {
     method: "GET",
@@ -287,9 +290,48 @@ export async function getPlaceDetails(
   }
 
   const data: GooglePlacesDetailsApiResponse = await response.json();
-  const results: PlaceDetailsAll = {}
+  const results: PlaceDetailsAll = {};
   if (fields.includes("location") && data.location) {
-    results.location = data.location
+    results.location = data.location;
   }
-  return {data: results}
+  return { data: results };
+}
+
+export async function fetchLocation() {
+  const DEFAULT_LOCATION = {
+    lat: 34.2895631,
+    lng: 134.0473344,
+  };
+
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    redirect("/login");
+  }
+
+  // 選択中の住所の緯度と経度を取得してくる
+
+  const { data: selectedAddress, error: selectedAddressError } = await supabase
+    .from("profiles")
+    .select(
+      `
+  addresses (
+    latitude,
+    longitude
+  )
+`,
+    )
+    .eq("id", user.id)
+    .single();
+    
+    if(selectedAddressError) {
+      console.error("緯度と経度の取得に失敗しました。", selectedAddressError);
+      throw new Error("緯度と経度の取得に失敗しました")
+      
+    }
 }
