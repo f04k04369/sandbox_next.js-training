@@ -2,6 +2,7 @@ import Categories from "@/components/categories";
 import RestaurantList from "@/components/restaurant-list";
 import {
   fetchCategoryRestaurants,
+  fetchLocation,
   fetchRestaurantsByKeyword,
 } from "@/lib/restaurants/api";
 import { redirect } from "next/navigation";
@@ -11,7 +12,8 @@ type SearchPageProps = {
   searchParams: Promise<{ category?: string; restaurant?: string }>;
 };
 
-export default function SaerchPage({ searchParams }: SearchPageProps) {
+export default async function SaerchPage({ searchParams }: SearchPageProps) {
+  const {lat, lng} = await fetchLocation()
   return (
     <Suspense
       fallback={<p className="text-muted-foreground py-8">読み込み中…</p>}
@@ -25,10 +27,12 @@ async function SaerchPageContent({ searchParams }: SearchPageProps) {
   const params = await searchParams;
   const category = params.category?.trim();
   const restaurant = params.restaurant?.trim();
+  
+  const {lat, lng} = await fetchLocation();
 
   if (category) {
     const { data: categoryRestaurants, error: fetchError } =
-      await fetchCategoryRestaurants(category);
+      await fetchCategoryRestaurants(category, lat, lng);
 
     return (
       <>
@@ -49,7 +53,7 @@ async function SaerchPageContent({ searchParams }: SearchPageProps) {
     );
   } else if (restaurant) {
     const { data: restaurants, error: fetchError } =
-      await fetchRestaurantsByKeyword(restaurant);
+      await fetchRestaurantsByKeyword(restaurant, lat, lng);
 
     return (
       <>

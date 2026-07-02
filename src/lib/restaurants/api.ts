@@ -7,7 +7,8 @@ import { transformPlaceResults } from "./utils";
 import { createClient } from "../supabase/server";
 import { redirect } from "next/navigation";
 
-export async function fetchRestaurants() {
+// 近くのレストランを取得
+export async function fetchRestaurants(lat: number, lng: number) {
   "use cache";
   const url = "https://places.googleapis.com/v1/places:searchNearby";
 
@@ -43,8 +44,8 @@ export async function fetchRestaurants() {
     locationRestriction: {
       circle: {
         center: {
-          latitude: 34.2895631, //香川
-          longitude: 134.0473344,
+          latitude: lat, //香川
+          longitude: lng,
         },
         radius: 10000.0,
       },
@@ -82,7 +83,7 @@ export async function fetchRestaurants() {
 }
 
 // キーワード検索
-export async function fetchRestaurantsByKeyword(query: string) {
+export async function fetchRestaurantsByKeyword(query: string, lat: number, lng: number) {
   "use cache";
 
   const url = "https://places.googleapis.com/v1/places:searchText";
@@ -102,8 +103,8 @@ export async function fetchRestaurantsByKeyword(query: string) {
     locationBias: {
       circle: {
         center: {
-          latitude: 34.2895631, //香川
-          longitude: 134.0473344,
+          latitude: lat, //香川
+          longitude: lng,
         },
         radius: 10000.0,
       },
@@ -135,7 +136,7 @@ export async function fetchRestaurantsByKeyword(query: string) {
 }
 
 // カテゴリ検索機能
-export async function fetchCategoryRestaurants(category: string) {
+export async function fetchCategoryRestaurants(category: string, lat: number, lng: number) {
   "use cache";
 
   const url = "https://places.googleapis.com/v1/places:searchNearby";
@@ -155,8 +156,8 @@ export async function fetchCategoryRestaurants(category: string) {
     locationRestriction: {
       circle: {
         center: {
-          latitude: 34.2895631, //香川
-          longitude: 134.0473344,
+          latitude: lat, //香川
+          longitude: lng,
         },
         radius: 10000.0,
       },
@@ -190,7 +191,7 @@ export async function fetchCategoryRestaurants(category: string) {
 }
 
 // 近くのラーメン屋を検索
-export async function fetchRamenRestaurants() {
+export async function fetchRamenRestaurants(lat: number, lng: number) {
   "use cache";
 
   const url = "https://places.googleapis.com/v1/places:searchNearby";
@@ -210,8 +211,8 @@ export async function fetchRamenRestaurants() {
     locationRestriction: {
       circle: {
         center: {
-          latitude: 34.2895631, //香川
-          longitude: 134.0473344,
+          latitude: lat, //香川
+          longitude: lng,
         },
         radius: 10000.0,
       },
@@ -320,7 +321,7 @@ export async function fetchLocation() {
     .from("profiles")
     .select(
       `
-  addresses (
+  addresses!selected_address_id (
     latitude,
     longitude
   )
@@ -328,10 +329,18 @@ export async function fetchLocation() {
     )
     .eq("id", user.id)
     .single();
-    
-    if(selectedAddressError) {
-      console.error("緯度と経度の取得に失敗しました。", selectedAddressError);
-      throw new Error("緯度と経度の取得に失敗しました")
-      
-    }
+
+  if (selectedAddressError) {
+    console.error("緯度と経度の取得に失敗しました。", selectedAddressError);
+    return DEFAULT_LOCATION;
+  }
+
+  const address = Array.isArray(selectedAddress.addresses)
+    ? selectedAddress.addresses[0]
+    : selectedAddress.addresses;
+
+  const lat = address?.latitude ?? DEFAULT_LOCATION.lat;
+  const lng = address?.longitude ?? DEFAULT_LOCATION.lng;
+
+  return { lat, lng };
 }

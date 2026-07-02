@@ -5,6 +5,9 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const input = searchParams.get("input");
   const sessionToken = searchParams.get("sessionToken");
+  const lat = searchParams.get("lat");
+  const lng = searchParams.get("lng");
+
 
   if (!input) {
     return NextResponse.json({ error: "文字を入力してください" }, { status: 400 });
@@ -33,8 +36,8 @@ export async function GET(request: NextRequest) {
       locationBias: {
         circle: {
           center: {
-            latitude: 34.2895631, //香川
-            longitude: 134.0473344,
+            latitude: lat, //香川
+            longitude: lng,
           },
           radius: 10000.0,
         },

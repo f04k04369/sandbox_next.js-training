@@ -29,6 +29,7 @@ import {
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
 
 interface AddressResponse {
   addressList: Address[];
@@ -48,6 +49,7 @@ export default function AddressModal() {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   const fetchSuggestions = useDebouncedCallback(async (input: string) => {
     if (!input.trim() || !sessionToken) {
@@ -126,6 +128,8 @@ export default function AddressModal() {
       setInputText("");
 
       await mutate();
+
+      router.refresh();
     } catch (error) {
       console.error(error);
       alert("予期せぬエラーが発生しました");
@@ -134,7 +138,7 @@ export default function AddressModal() {
   };
 
   const handleSelectAddress = async (address: Address) => {
-    alert("address");
+    // alert("address");
     try {
       await selectAddressAction(address.id);
       await mutate(
@@ -145,6 +149,7 @@ export default function AddressModal() {
         { revalidate: true },
       );
       setOpen(false);
+      router.refresh();
     } catch (error) {
       console.error(error);
       alert("予期せぬエラーが発生しました");
@@ -156,8 +161,13 @@ export default function AddressModal() {
     const ok = window.confirm("住所を削除しますか？");
     if (!ok) return;
     try {
+      const selectedAddressId = data?.selectedAddress?.id;
       await deleteAddressAction(addressId);
       mutate();
+
+      if (selectedAddressId === addressId) {
+        router.refresh();
+      }
     } catch (error) {
       console.error(error);
       alert("予期せぬエラーが発生しました");

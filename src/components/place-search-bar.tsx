@@ -19,7 +19,12 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function PlaceSearchBar() {
+interface PlaceSearchBarProps {
+  lat: number;
+  lng: number;
+}
+
+export default function PlaceSearchBar({lat, lng}: PlaceSearchBarProps) {
   const [open, setOpen] = useState(false);
   const [inputText, setInputText] = useState("");
   const [sessionToken, setSessionToken] = useState("");
@@ -42,7 +47,7 @@ export default function PlaceSearchBar() {
     setErrorMessage(null);
     try {
       const response = await fetch(
-        `/api/restaurant/autocomplete?input=${input}&sessionToken=${sessionToken}`,
+        `/api/restaurant/autocomplete?input=${input}&sessionToken=${sessionToken}&lat=${lat}&lng=${lng}`,
       );
       if (!response.ok) {
         const errorData = await response.json();

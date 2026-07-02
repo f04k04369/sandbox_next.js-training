@@ -3,24 +3,34 @@ import Categories from "@/components/categories";
 import RestaurantCard from "@/components/restaurant-card";
 import RestaurantList from "@/components/restaurant-list";
 import Section from "@/components/section";
-import { fetchRamenRestaurants, fetchRestaurants } from "@/lib/restaurants/api";
+import {
+  fetchLocation,
+  fetchRamenRestaurants,
+  fetchRestaurants,
+} from "@/lib/restaurants/api";
 import { Suspense } from "react";
 
-export default function Home() {
+export default async function Home() {
+  const { lat, lng } = await fetchLocation();
+  console.log("lat", lat);
+  console.log("lng", lng);
+
   return (
     <>
       <Suspense
-        fallback={<p className="text-muted-foreground py-4">カテゴリを読み込み中…</p>}
+        fallback={
+          <p className="text-muted-foreground py-4">カテゴリを読み込み中…</p>
+        }
       >
         <Categories />
       </Suspense>
 
       <Suspense fallback={<SectionFallback title="近くレストラン" />}>
-        <NearbyRestaurantSection />
+        <NearbyRestaurantSection lat={lat} lng={lng} />
       </Suspense>
 
       <Suspense fallback={<SectionFallback title="近くのラーメン店" />}>
-        <RamenRestaurantSection />
+        <RamenRestaurantSection lat={lat} lng={lng} />
       </Suspense>
     </>
   );
@@ -34,9 +44,15 @@ function SectionFallback({ title }: { title: string }) {
   );
 }
 
-async function NearbyRestaurantSection() {
+async function NearbyRestaurantSection({
+  lat,
+  lng,
+}: {
+  lat: number;
+  lng: number;
+}) {
   const { data: nerarbyRestaurants, error: nerarbyRestaurantsError } =
-    await fetchRestaurants();
+    await fetchRestaurants(lat, lng);
 
   if (!nerarbyRestaurants) {
     return <p>{nerarbyRestaurantsError}</p>;
@@ -60,9 +76,17 @@ async function NearbyRestaurantSection() {
   );
 }
 
-async function RamenRestaurantSection() {
-  const { data: nerarybyRamenRestaurants, error: nerarybyRamenRestaurantsError } =
-    await fetchRamenRestaurants();
+async function RamenRestaurantSection({
+  lat,
+  lng,
+}: {
+  lat: number;
+  lng: number;
+}) {
+  const {
+    data: nerarybyRamenRestaurants,
+    error: nerarybyRamenRestaurantsError,
+  } = await fetchRamenRestaurants(lat, lng);
 
   if (!nerarybyRamenRestaurants) {
     return <p>{nerarybyRamenRestaurantsError}</p>;
@@ -75,7 +99,9 @@ async function RamenRestaurantSection() {
   return (
     <Section
       title="近くのラーメン店"
-      expandedContent={<RestaurantList restaurants={nerarybyRamenRestaurants} />}
+      expandedContent={
+        <RestaurantList restaurants={nerarybyRamenRestaurants} />
+      }
     >
       <CarouselContainer slideToShow={4}>
         {nerarybyRamenRestaurants.map((restaurant, index) => (

@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import PlaceSearchBar from "./place-search-bar";
 import AddressModal from "./address-modal";
+import { fetchLocation } from "@/lib/restaurants/api";
 
-function Header() {
+async function Header() {
+  const { lat, lng} = await fetchLocation();
   return (
     <header className="bg-background h-16 fixed top-0 left-0 w-full z-50">
       <div className="flex items-center  h-full space-x-4 px-4 max-w-[1920px] mx-auto">
@@ -33,7 +35,7 @@ function Header() {
           <Suspense
             fallback={<div className="h-9 rounded-md bg-muted animate-pulse" />}
           >
-            <PlaceSearchBar />
+            <PlaceSearchBar lat={lat} lng={lng}/>
           </Suspense>
         </div>
         <div>カート</div>
