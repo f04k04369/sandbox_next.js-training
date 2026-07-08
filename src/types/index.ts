@@ -52,6 +52,12 @@ export interface GooglePlacesDetailsApiResponse {
     latitude?: number;
     longitude?: number;
   };
+  displayName?: {
+    languageCode?: string;
+    text?: string;
+  };
+  primaryType?: string;
+  photos?: PlacePhoto[]
 }
 
 export type RestaurantSuggestion =
@@ -76,6 +82,9 @@ export interface PlaceDetailsAll {
     latitude?: number;
     longitude?: number;
   };
+  displayName?: string;
+  primaryType?: string;
+  photoUrl?: string;
 }
 
 

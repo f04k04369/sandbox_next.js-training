@@ -83,7 +83,11 @@ export async function fetchRestaurants(lat: number, lng: number) {
 }
 
 // キーワード検索
-export async function fetchRestaurantsByKeyword(query: string, lat: number, lng: number) {
+export async function fetchRestaurantsByKeyword(
+  query: string,
+  lat: number,
+  lng: number,
+) {
   "use cache";
 
   const url = "https://places.googleapis.com/v1/places:searchText";
@@ -136,7 +140,11 @@ export async function fetchRestaurantsByKeyword(query: string, lat: number, lng:
 }
 
 // カテゴリ検索機能
-export async function fetchCategoryRestaurants(category: string, lat: number, lng: number) {
+export async function fetchCategoryRestaurants(
+  category: string,
+  lat: number,
+  lng: number,
+) {
   "use cache";
 
   const url = "https://places.googleapis.com/v1/places:searchNearby";
@@ -295,6 +303,23 @@ export async function getPlaceDetails(
   if (fields.includes("location") && data.location) {
     results.location = data.location;
   }
+
+  if (fields.includes("displayName") && data.displayName?.text) {
+    results.displayName = data.displayName.text;
+  }
+
+  if (fields.includes("primaryType") && data.primaryType) {
+    results.primaryType = data.primaryType;
+  }
+
+  if (fields.includes("photos") && data.photos) {
+    results.photoUrl = data.photos?.[0]?.name
+      ? await getPhotoUrl(data.photos[0].name)
+      : "/no_image.png";
+  }
+
+  console.log("results", results);
+
   return { data: results };
 }
 

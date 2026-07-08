@@ -13,7 +13,7 @@ export default async function RestaurantPage({params, searchParams}: {
   console.log("restaurantId", restaurantId);
   console.log("sessionToken", sessionToken);
 
-  await getPlaceDetails(restaurantId, ["displayName","photos","primaryType"], sessionToken)
+  await getPlaceDetails(restaurantId, ["displayName","photos","primaryType"], sessionToken);
 
   return (
     <div>
