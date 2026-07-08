@@ -253,7 +253,7 @@ export async function fetchRamenRestaurants(lat: number, lng: number) {
   return { data: RamenRestaurants };
 }
 
-export async function getPhotoUrl(name: string, maxWidth = 400) {
+export async function getPhotoUrl(name: string, maxWidth = 1200) {
   "use cache";
   console.log("getPhotoUrl実行");
   const apiKey = process.env.GOOGLE_API_KEY;
@@ -312,7 +312,7 @@ export async function getPlaceDetails(
     results.primaryType = data.primaryType;
   }
 
-  if (fields.includes("photos") && data.photos) {
+  if (fields.includes("photos") ) {
     results.photoUrl = data.photos?.[0]?.name
       ? await getPhotoUrl(data.photos[0].name)
       : "/no_image.png";
