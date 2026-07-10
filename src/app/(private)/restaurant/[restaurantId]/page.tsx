@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { fetchCategoryMenus } from "@/lib/menus/api";
 import { getPlaceDetails } from "@/lib/restaurants/api";
 import { Heart } from "lucide-react";
 import Image from "next/image";
@@ -24,6 +25,11 @@ export default async function RestaurantPage({
   );
 
   console.log("restaurant", restaurant);
+
+  const primaryType = restaurant?.primaryType;
+
+  // const { data: categoryMenus, error: menusError } =
+  primaryType ? fetchCategoryMenus(primaryType) : { data: [] };
 
   if (!restaurant) notFound();
 
