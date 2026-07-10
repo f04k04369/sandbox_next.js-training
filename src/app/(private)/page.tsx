@@ -10,11 +10,7 @@ import {
 } from "@/lib/restaurants/api";
 import { Suspense } from "react";
 
-export default async function Home() {
-  const { lat, lng } = await fetchLocation();
-  console.log("lat", lat);
-  console.log("lng", lng);
-
+export default function Home() {
   return (
     <>
       <Suspense
@@ -25,12 +21,15 @@ export default async function Home() {
         <Categories />
       </Suspense>
 
-      <Suspense fallback={<SectionFallback title="近くレストラン" />}>
-        <NearbyRestaurantSection lat={lat} lng={lng} />
-      </Suspense>
-
-      <Suspense fallback={<SectionFallback title="近くのラーメン店" />}>
-        <RamenRestaurantSection lat={lat} lng={lng} />
+      <Suspense
+        fallback={
+          <>
+            <SectionFallback title="近くレストラン" />
+            <SectionFallback title="近くのラーメン店" />
+          </>
+        }
+      >
+        <LocationBasedRestaurants />
       </Suspense>
     </>
   );
@@ -41,6 +40,19 @@ function SectionFallback({ title }: { title: string }) {
     <Section title={title}>
       <p className="text-muted-foreground py-4">読み込み中…</p>
     </Section>
+  );
+}
+
+async function LocationBasedRestaurants() {
+  const { lat, lng } = await fetchLocation();
+  console.log("lat", lat);
+  console.log("lng", lng);
+
+  return (
+    <>
+      <NearbyRestaurantSection lat={lat} lng={lng} />
+      <RamenRestaurantSection lat={lat} lng={lng} />
+    </>
   );
 }
 
