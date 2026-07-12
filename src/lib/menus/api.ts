@@ -39,5 +39,27 @@ export async function fetchCategoryMenus(primaryType: string) {
     items: featuredItems,
   });
 
+  const categories = Array.from(new Set(menus.map((menu) => menu.category)));
+  console.log("categories", categories);
+
+  for (const category of categories) {
+    const items = menus
+      .filter((menu) => menu.category === category)
+      .map((menu) => ({
+        id: menu.id,
+        name: menu.name,
+        price: menu.price,
+        photoUrl: supabase.storage.from("menus").getPublicUrl(menu.image_path)
+          .data.publicUrl,
+      }));
+
+    categoryMenus.push({
+      id: category,
+      categoryName: category,
+      items: items,
+    });
+  }
   console.log("categoryMenus", categoryMenus);
+
+  return { data: categoryMenus };
 }
