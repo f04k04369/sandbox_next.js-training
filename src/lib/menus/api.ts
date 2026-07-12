@@ -1,9 +1,11 @@
+import { CategoryMenu, Menu } from "@/types";
 import { createClient } from "../supabase/server";
 
 export async function fetchCategoryMenus(primaryType: string) {
   console.log("fetching category menus for primary type", primaryType);
 
   const supabase = await createClient();
+  const bucket = supabase.storage.from("menus")
 
   const { data: menus, error: menusError } = await supabase
     .from("menus")
@@ -20,17 +22,21 @@ export async function fetchCategoryMenus(primaryType: string) {
     return { data: [] };
   }
 
-  const categoryMenus = [];
+  const categoryMenus: CategoryMenu[] = [];
+
+
 
   const featuredItems = menus
     ?.filter((menu) => menu.is_featured)
-    .map((menu) => ({
-      id: menu.id,
-      photoUtl: supabase.storage.from("menus").getPublicUrl(menu.image_path)
-        .data.publicUrl,
-      name: menu.name,
-      price: menu.price,
-    }));
+    .map(
+      (menu): Menu => ({
+        id: menu.id,
+        photoUrl: bucket.getPublicUrl(menu.image_path)
+          .data.publicUrl,
+        name: menu.name,
+        price: menu.price,
+      }),
+    );
   console.log("featuredItems", featuredItems);
 
   categoryMenus.push({
@@ -45,13 +51,15 @@ export async function fetchCategoryMenus(primaryType: string) {
   for (const category of categories) {
     const items = menus
       .filter((menu) => menu.category === category)
-      .map((menu) => ({
-        id: menu.id,
-        name: menu.name,
-        price: menu.price,
-        photoUrl: supabase.storage.from("menus").getPublicUrl(menu.image_path)
-          .data.publicUrl,
-      }));
+      .map(
+        (menu): Menu => ({
+          id: menu.id,
+          name: menu.name,
+          price: menu.price,
+          photoUrl: bucket.getPublicUrl(menu.image_path)
+            .data.publicUrl,
+        }),
+      );
 
     categoryMenus.push({
       id: category,
