@@ -312,10 +312,14 @@ export async function getPlaceDetails(
     results.primaryType = data.primaryType;
   }
 
-  if (fields.includes("photos") ) {
-    results.photoUrl = data.photos?.[0]?.name
-      ? await getPhotoUrl(data.photos[0].name)
-      : "/no_image.png";
+  // if (fields.includes("photos")) {
+  //   results.photoUrl = data.photos?.[0]?.name
+  //     ? await getPhotoUrl(data.photos[0].name)
+  //     : "/no_image.png";
+  // }
+
+  if (fields.includes("photos")) {
+    results.photoUrl = "/test-img.png";
   }
 
   console.log("results", results);
