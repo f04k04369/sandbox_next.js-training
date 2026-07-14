@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   logging: {
     fetches: {
-      fullUrl: true
+      fullUrl: true,
     },
   },
   experimental: {
@@ -14,8 +14,13 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'places.googleapis.com',
+        protocol: "https",
+        hostname: "places.googleapis.com",
+      },
+
+      {
+        protocol: "https",
+        hostname: "clhoxtrvpfhiaoppuxla.supabase.co",
       },
     ],
   },
