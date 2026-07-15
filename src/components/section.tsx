@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 
 interface SectionProps {
   children: ReactNode;
-  title: string;
+  title?: string;
   expandedContent?: ReactNode;
   showAllButton?: boolean;
 }
