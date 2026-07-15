@@ -3,6 +3,7 @@ import Categories from "@/components/categories";
 import RestaurantCard from "@/components/restaurant-card";
 import RestaurantList from "@/components/restaurant-list";
 import Section from "@/components/section";
+import { fetchMenus } from "@/lib/menus/api";
 import {
   fetchLocation,
   fetchRamenRestaurants,
@@ -10,7 +11,7 @@ import {
 } from "@/lib/restaurants/api";
 import { Suspense } from "react";
 
-export default function Home() {
+export default async function Home() {
   return (
     <>
       <Suspense
@@ -107,6 +108,13 @@ async function RamenRestaurantSection({
   if (nerarybyRamenRestaurants.length === 0) {
     return <p>近くにラーメン店がありません</p>;
   }
+
+  const primaryType = nerarybyRamenRestaurants[0]?.primaryType;
+  const { data: menus, error: menusError } = primaryType
+    ? await fetchMenus(primaryType)
+    : { data: [] };
+
+  console.log("menus", menus);
 
   return (
     <Section
