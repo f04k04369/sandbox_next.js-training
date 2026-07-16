@@ -1,3 +1,4 @@
+"use client"
 import {
   Dialog,
   DialogContent,
@@ -11,23 +12,33 @@ import { Button } from "./ui/button";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Menu } from "@/types";
 import { useState } from "react";
+import { addToCartAction } from "@/app/(private)/actions/cartActions";
 
 interface MenuModalProps {
   isOpen: boolean;
   closeModal: () => void;
   selectedItem: Menu | null;
+  restaurantId: string;
 }
 
 export default function MenuModal({
   isOpen,
   closeModal,
   selectedItem,
+  restaurantId,
 }: MenuModalProps) {
-
   const [quantity, setQuantity] = useState(1);
+  const handleAddToCart = async() => {
+    if(!selectedItem) return;
+    try {
+      await addToCartAction(selectedItem, quantity, restaurantId);
+    } catch (error) {
+      console.error(error);
+      alert("エラーが発生しました");
+    }
+  }
 
   return (
-    
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
@@ -86,6 +97,7 @@ export default function MenuModal({
 
                 <DialogClose asChild>
                   <Button
+                    onClick={handleAddToCart}
                     type="button"
                     size="lg"
                     className="mt-6 h-14 text-lg font-semibold"
