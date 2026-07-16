@@ -71,7 +71,7 @@ export default function MenuContent({ categoryMenus }: MenuContentProps) {
         ))}
       </div>
 
-      <MenuModal isOpen={isOpen} closeModal={closeModal} />
+      <MenuModal isOpen={isOpen} closeModal={closeModal} selectedItem={selectedItem}/>
     </div>
   );
 }
