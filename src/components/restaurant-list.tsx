@@ -12,5 +12,5 @@ export default function RestaurantList({restaurants}: RestaurantListProps) {
             <RestaurantCard restaurant={restaurant} key={restaurant.id}/>
         ))}
     </ul>
-  );
+  )
 }
