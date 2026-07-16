@@ -1,6 +1,7 @@
 import CarouselContainer from "@/components/carousel-container";
 import Categories from "@/components/categories";
 import MenuCard from "@/components/menu-card";
+import MenuClient from "@/components/menu-client";
 import MenuList from "@/components/menu-list";
 import RestaurantCard from "@/components/restaurant-card";
 import RestaurantList from "@/components/restaurant-list";
@@ -79,16 +80,9 @@ export default async function Home() {
       ) : menus.length > 0 && restaurant ? (
         <Section
           title={restaurant.restaurantName}
-          expandedContent={
-            <MenuList menus={menus}/>
-          }
+          expandedContent={<MenuList menus={menus} restaurantId={restaurant.id}/>}
         >
-
-          <CarouselContainer slideToShow={6}>
-            {menus.map((menu) => (
-              <MenuCard key={menu.id} menu={menu} />
-            ))}
-          </CarouselContainer>
+          <MenuClient restaurantId={restaurant.id} menus={menus}/>
 
         </Section>
       ) : (
