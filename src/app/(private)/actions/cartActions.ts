@@ -21,7 +21,7 @@ export async function addToCartAction(
   const { data: existingCart, error: existingCartError } = await supabase
     .from("carts")
     .select("id")
-    .match({ user_id: user.id, restaurantId: restaurantId })
+    .match({ user_id: user.id, restaurant_id: restaurantId })
     .maybeSingle();
 
   if (existingCartError) {

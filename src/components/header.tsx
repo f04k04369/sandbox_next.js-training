@@ -6,6 +6,7 @@ import { Menu } from "lucide-react";
 import PlaceSearchBar from "./place-search-bar";
 import AddressModal from "./address-modal";
 import { fetchLocation } from "@/lib/restaurants/api";
+import Cart from "./cart";
 
 async function Header() {
   const { lat, lng} = await fetchLocation();
@@ -38,7 +39,7 @@ async function Header() {
             <PlaceSearchBar lat={lat} lng={lng}/>
           </Suspense>
         </div>
-        <div>カート</div>
+        <Cart />
       </div>
     </header>
   );
