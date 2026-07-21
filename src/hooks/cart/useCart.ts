@@ -1,3 +1,4 @@
+import { Cart } from "@/types";
 import useSWR from "swr";
 
 const fetcher = async (url: string) => {
@@ -20,7 +21,7 @@ export function useCart() {
     error: cartError,
     isLoading,
     mutate: mutateCart,
-  } = useSWR(`/api/cart`, fetcher);
+  } = useSWR<Cart[]>(`/api/cart`, fetcher);
   
   return {carts, cartError, isLoading, mutateCart}
 }
