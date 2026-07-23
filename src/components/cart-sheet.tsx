@@ -1,4 +1,4 @@
-import { Cart } from "@/types";
+import { Cart, CartItem } from "@/types";
 import {
   Sheet,
   SheetClose,
@@ -26,6 +26,11 @@ interface CartSheetProps {
 }
 
 export default function CartSheet({ cart, count }: CartSheetProps) {
+  const calculateItemTotal = (item: CartItem) =>
+    item.quantity * item.menus.price;
+    
+  const caluculateSubtotal = (cartItem: CartItem[]) => cartItem.reduce((sum,item) => sum + calculateItemTotal(item), 0);
+
   return (
     <Sheet>
       <SheetTrigger className="relative cursor-pointer">
@@ -99,11 +104,23 @@ export default function CartSheet({ cart, count }: CartSheetProps) {
                       <option value="4">4</option>
                       <option value="5">5</option>
                     </select>
-                    <p>￥{item.menus.price}</p>
+                    <p>￥{calculateItemTotal(item).toLocaleString()}</p>
                   </div>
                 </li>
               ))}
             </ul>
+
+            <div className="flex justify-between items-center font-bold text-xl">
+              <div>小計</div>
+              <div>{caluculateSubtotal(cart.cart_items).toLocaleString()}</div>
+            </div>
+            <SheetClose asChild>
+              <Button asChild>
+                <Link href={`/checkout/${cart.restaurant_id}`}>
+                  お会計に進む
+                </Link>
+              </Button>
+            </SheetClose>
           </>
         ) : (
           <div className="flex flex-col items-center justify-center h-full gap-4">

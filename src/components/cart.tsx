@@ -6,7 +6,19 @@ import CartSheet from "./cart-sheet";
 import CartDropDown from "./cart-drop-down";
 
 export default function Cart() {
-  const { carts } = useCart();
+  const { carts, isLoading, cartError } = useCart();
   const { displayMode, sheetCart, cartCount } = computeCartDisplayLogic(carts);
-  return displayMode === "cartSheet" ? <CartSheet cart={sheetCart} count={cartCount}/> : <CartDropDown />;
+  
+  if(cartError) {
+    return <div>Error: {cartError.message}</div>;
+  }
+  if(isLoading || !carts) {
+    return <div>...Loading</div>;
+  }
+
+  return displayMode === "cartSheet" ? (
+    <CartSheet cart={sheetCart} count={cartCount} />
+  ) : (
+    <CartDropDown carts={carts}/>
+  );
 }
