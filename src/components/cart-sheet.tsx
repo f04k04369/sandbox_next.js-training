@@ -28,8 +28,9 @@ interface CartSheetProps {
 export default function CartSheet({ cart, count }: CartSheetProps) {
   const calculateItemTotal = (item: CartItem) =>
     item.quantity * item.menus.price;
-    
-  const caluculateSubtotal = (cartItem: CartItem[]) => cartItem.reduce((sum,item) => sum + calculateItemTotal(item), 0);
+
+  const caluculateSubtotal = (cartItem: CartItem[]) =>
+    cartItem.reduce((sum, item) => sum + calculateItemTotal(item), 0);
 
   return (
     <Sheet>
