@@ -1,11 +1,15 @@
+import { toCart } from "@/lib/cart/utils";
 import { getPlaceDetails } from "@/lib/restaurants/api";
 import { createClient } from "@/lib/supabase/server";
-import { Cart } from "@/types";
+import { Cart, RawCart } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
+    const bucket = supabase.storage.from("menus");
+    const getPublicUrl = (imagePath: string) =>
+      bucket.getPublicUrl(imagePath).data.publicUrl;
 
     const {
       data: { user },
@@ -25,7 +29,6 @@ export async function GET(request: NextRequest) {
         `
         id,
         restaurant_id,
-        some_column,
         cart_items (
          id,
          quantity,
@@ -50,9 +53,9 @@ export async function GET(request: NextRequest) {
 
     console.log("carts", carts);
 
-    const promises = carts.map(async (cart): Promise<Cart> => {
+    const promises = (carts as RawCart[]).map(async (rawCart): Promise<Cart> => {
       const { data: restaurantData, error } = await getPlaceDetails(
-        cart.restaurant_id,
+        rawCart.restaurant_id,
         ["displayName", "photos"],
       );
 
@@ -60,17 +63,7 @@ export async function GET(request: NextRequest) {
         throw new Error(`レストランデータの取得に失敗しました${error}`);
       }
 
-      return {
-        id: cart.id,
-        restaurant_id: cart.restaurant_id,
-        restaurantName: restaurantData.displayName,
-        photoUrl: restaurantData.photoUrl!,
-        cart_items: cart.cart_items.map((item) => ({
-          id: item.id,
-          quantity: item.quantity,
-          menus: Array.isArray(item.menus) ? item.menus[0] : item.menus,
-        })),
-      };
+      return toCart(rawCart, restaurantData, getPublicUrl);
     });
 
     const results = await Promise.all(promises);
@@ -84,4 +77,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-

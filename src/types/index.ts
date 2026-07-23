@@ -124,6 +124,28 @@ export interface CartItem {
     id: number;
     name: string;
     price: number;
-    image_path: string;
+    photoUrl: string;
   };
 }
+
+/** Supabase から返るメニューの生データ */
+export type RawMenu = {
+  id: number;
+  name: string;
+  price: number;
+  image_path: string;
+};
+
+/** Supabase から返る cart_items の生データ */
+export type RawCartItem = {
+  id: number;
+  quantity: number;
+  menus: RawMenu | RawMenu[];
+};
+
+/** Supabase から返る carts の生データ */
+export type RawCart = {
+  id: number;
+  restaurant_id: string;
+  cart_items: RawCartItem[];
+};

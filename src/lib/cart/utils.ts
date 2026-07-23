@@ -1,4 +1,4 @@
-import { Cart } from "@/types";
+import { Cart, CartItem, RawCart, RawCartItem, RawMenu } from "@/types";
 
 const sumItems = (cart: Cart) =>
   cart.cart_items.reduce((sum, item) => sum + item.quantity, 0);
@@ -22,5 +22,42 @@ export function computeCartDisplayLogic(carts: Cart[] | undefined) {
     displayMode: "cartDropDown",
     sheetCart: null,
     cartCount: 0,
+  };
+}
+
+function normalizeMenu(menu: RawMenu | RawMenu[]): RawMenu {
+  return Array.isArray(menu) ? menu[0] : menu;
+}
+
+export function toCartItem(
+  item: RawCartItem,
+  getPublicUrl: (imagePath: string) => string,
+): CartItem {
+  const { image_path, ...restMenu } = normalizeMenu(item.menus);
+
+  return {
+    id: item.id,
+    quantity: item.quantity,
+    menus: {
+      ...restMenu,
+      photoUrl: getPublicUrl(image_path),
+    },
+  };
+}
+
+export function toCart(
+  rawCart: RawCart,
+  restaurant: { displayName?: string; photoUrl?: string },
+  getPublicUrl: (imagePath: string) => string,
+): Cart {
+  const { id, restaurant_id } = rawCart;
+
+  return {
+    ...{ id, restaurant_id },
+    restaurantName: restaurant.displayName,
+    photoUrl: restaurant.photoUrl!,
+    cart_items: rawCart.cart_items.map((item) =>
+      toCartItem(item, getPublicUrl),
+    ),
   };
 }
