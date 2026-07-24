@@ -9,20 +9,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Cart, CartItem } from "@/types";
+import { Dispatch, SetStateAction } from "react";
 
 interface CartDropDownProps {
   carts: Cart[];
+  setSelectedCart: Dispatch<SetStateAction<Cart | null>>;
 }
 
-export default function CartDropDown({ carts }: CartDropDownProps) {
+export default function CartDropDown({
+  carts,
+  setSelectedCart,
+}: CartDropDownProps) {
   const calculateItemTotal = (item: CartItem) =>
     item.quantity * item.menus.price;
 
   const caluculateSubtotal = (cartItem: CartItem[]) =>
     cartItem.reduce((sum, item) => sum + calculateItemTotal(item), 0);
-    
-  const caluculateTotalQuantity = (cartItem: CartItem[]) => 
-    cartItem.reduce((sum, item) => sum + item.quantity, 0)
+
+  const caluculateTotalQuantity = (cartItem: CartItem[]) =>
+    cartItem.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <DropdownMenu>
@@ -35,7 +40,11 @@ export default function CartDropDown({ carts }: CartDropDownProps) {
 
       <DropdownMenuContent className="w-[420px]">
         {carts.map((cart) => (
-          <DropdownMenuItem key={cart.id} className="flex items-center p-4 justify-between">
+          <DropdownMenuItem
+            key={cart.id}
+            className="flex items-center p-4 justify-between"
+            onClick={() => setSelectedCart(cart)}
+          >
             <div className="flex gap-3 flex-1 min-w-0">
               <div className="w-[64px] h-[64px] relative overflow-hidden rounded-full flex-none">
                 <Image
