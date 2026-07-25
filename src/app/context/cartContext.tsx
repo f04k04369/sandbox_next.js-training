@@ -12,7 +12,7 @@ import {
 interface CartContextType {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
-  openCart: (menu: Menu) => void;
+  openCart: () => void;
   closeCart: () => void;
 }
 
@@ -29,17 +29,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <CartContext.Provider value={{ isOpen, setIsOpen, openCart, closeCart  }}>
+    <CartContext.Provider value={{ isOpen, setIsOpen, openCart, closeCart }}>
       {children}
     </CartContext.Provider>
   );
 };
 
-
 export const useCartVisibility = () => {
-    const context = useContext(CartContext);
-    if(!context) {
-        throw new Error("useCartVisibilityはCartProviderの中で使用する必要があります")
-    }
-    return context;
-}
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error(
+      "useCartVisibilityはCartProviderの中で使用する必要があります",
+    );
+  }
+  return context;
+};

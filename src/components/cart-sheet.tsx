@@ -23,9 +23,18 @@ import {
 interface CartSheetProps {
   cart: Cart | null;
   count: number;
+  isOpen: boolean;
+  closeCart: () => void;
+  openCart: () => void;
 }
 
-export default function CartSheet({ cart, count }: CartSheetProps) {
+export default function CartSheet({
+  cart,
+  count,
+  isOpen,
+  closeCart,
+  openCart,
+}: CartSheetProps) {
   const calculateItemTotal = (item: CartItem) =>
     item.quantity * item.menus.price;
 
@@ -33,7 +42,10 @@ export default function CartSheet({ cart, count }: CartSheetProps) {
     cartItem.reduce((sum, item) => sum + calculateItemTotal(item), 0);
 
   return (
-    <Sheet>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => (open ? openCart() : closeCart())}
+    >
       <SheetTrigger className="relative cursor-pointer">
         <ShoppingCart />
         <span className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 bg-green-700 rounded-full size-4 text-xs text-primary-foreground flex items-center justify-center">
@@ -52,12 +64,14 @@ export default function CartSheet({ cart, count }: CartSheetProps) {
         {cart ? (
           <>
             <div className="flex items-center justify-between">
-              <Link
-                className="font-bold text-2xl"
-                href={`/restaurant/${cart.restaurant_id}`}
-              >
-                {cart.restaurantName}
-              </Link>
+              <SheetClose asChild>
+                <Link
+                  className="font-bold text-2xl"
+                  href={`/restaurant/${cart.restaurant_id}`}
+                >
+                  {cart.restaurantName}
+                </Link>
+              </SheetClose>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>

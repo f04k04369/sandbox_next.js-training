@@ -15,13 +15,17 @@ const fetcher = async (url: string) => {
   return data;
 };
 
-export function useCart() {
+export function useCart(restaurantId?: string) {
   const {
     data: carts,
     error: cartError,
     isLoading,
     mutate: mutateCart,
   } = useSWR<Cart[]>(`/api/cart`, fetcher);
-  
-  return {carts, cartError, isLoading, mutateCart}
+
+  const targetCart = restaurantId
+    ? (carts?.find((cart) => cart.restaurant_id === restaurantId) ?? null)
+    : null;
+
+  return { carts, cartError, isLoading, mutateCart };
 }
