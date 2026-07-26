@@ -12,10 +12,11 @@ export default function Cart() {
   const [selectedCart, setSelectedCart] = useState<Cart | null>(null);
   const { isOpen, openCart, closeCart } = useCartVisibility();
   const { restaurantId } = useParams<{ restaurantId?: string }>();
-  const { carts, isLoading, cartError } = useCart(restaurantId);
+  const { carts, isLoading, cartError, targetCart } = useCart(restaurantId);
   const { displayMode, sheetCart, cartCount } = computeCartDisplayLogic(
     carts,
     selectedCart,
+    targetCart
   );
 
   useEffect(() => {

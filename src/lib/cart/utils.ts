@@ -3,11 +3,14 @@ import { Cart, CartItem, RawCart, RawCartItem, RawMenu } from "@/types";
 const sumItems = (cart: Cart) =>
   cart.cart_items.reduce((sum, item) => sum + item.quantity, 0);
 
-export function computeCartDisplayLogic(carts: Cart[] | undefined, selectedCart: Cart | null) {
+export function computeCartDisplayLogic(
+  carts: Cart[] | undefined,
+  selectedCart: Cart | null,
+  targetCart: Cart | null
+) {
   // カートなし
   if (!carts || carts.length === 0) {
     return { displayMode: "cartSheet", sheetCart: null, cartCount: 0 };
-
   }
   // カート1件だけ
   if (carts.length === 1) {
@@ -18,14 +21,24 @@ export function computeCartDisplayLogic(carts: Cart[] | undefined, selectedCart:
       cartCount: sumItems(only),
     };
   }
-    // 選択されたカートがある場合
-    if (selectedCart) {
+  // 選択されたカートがある場合
+  if (selectedCart) {
+    return {
+      displayMode: "cartSheet",
+      sheetCart: selectedCart,
+      cartCount: sumItems(selectedCart),
+    };
+  }
+  
+    // targetCartがある場合
+    if (targetCart) {
       return {
         displayMode: "cartSheet",
-        sheetCart: selectedCart,
-        cartCount: sumItems(selectedCart),
+        sheetCart: targetCart,
+        cartCount: sumItems(targetCart),
       };
-    }  
+    }
+  
 
   return {
     displayMode: "cartDropDown",
