@@ -16,8 +16,14 @@ export default function Cart() {
   const { displayMode, sheetCart, cartCount } = computeCartDisplayLogic(
     carts,
     selectedCart,
-    targetCart
+    targetCart,
   );
+
+  useEffect(() => {
+    if (!carts || !selectedCart) return;
+    const updatedCart = carts.find((cart) => cart.id === selectedCart.id) ?? null;
+    setSelectedCart(updatedCart);
+  }, [carts]);
 
   useEffect(() => {
     if (isOpen) return;

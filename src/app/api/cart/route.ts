@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         )
       `,
       )
-      .eq("user_id", user.id);
+      .eq("user_id", user.id).order("id", {referencedTable: "cart_items", ascending: true});
 
     if (cartsError) {
       console.error("カートの取得に失敗しました", cartsError);

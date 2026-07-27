@@ -19,6 +19,7 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { updateCartItemAction } from "@/app/(private)/actions/cartActions";
 
 interface CartSheetProps {
   cart: Cart | null;
@@ -40,6 +41,20 @@ export default function CartSheet({
 
   const caluculateSubtotal = (cartItem: CartItem[]) =>
     cartItem.reduce((sum, item) => sum + calculateItemTotal(item), 0);
+    
+  const handleUpdateCartItem = async (value: string, cartItemId: number) => {
+    if(!cart) return;
+    
+    const quantity = Number(value);
+
+    try {
+      await updateCartItemAction(quantity, cartItemId, cart.id)
+
+    } catch (error) {
+      console.error(error);
+      alert("エラーが発生しました")
+    }
+  }
 
   return (
     <Sheet
@@ -109,7 +124,7 @@ export default function CartSheet({
                       id="quantity"
                       name="quantity"
                       value={item.quantity}
-                      onChange={() => {}}
+                      onChange={(e) => handleUpdateCartItem(e.target.value, item.id)}
                       className="border rounded-full pr-8 pl-4 bg-muted h-9"
                     >
                       <option value="0">削除する</option>

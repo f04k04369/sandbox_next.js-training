@@ -103,7 +103,7 @@ export interface CategoryMenu {
 }
 
 export interface Menu {
-  id: string;
+  id: number;
   name: string;
   photoUrl: string;
   price: number;

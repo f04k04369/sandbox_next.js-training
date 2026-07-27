@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   Dialog,
   DialogContent,
@@ -10,9 +10,10 @@ import {
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { DialogClose } from "@radix-ui/react-dialog";
-import { Menu } from "@/types";
-import { useState } from "react";
+import { Cart, Menu } from "@/types";
+import { useEffect, useState } from "react";
 import { addToCartAction } from "@/app/(private)/actions/cartActions";
+import { KeyedMutator } from "swr";
 
 interface MenuModalProps {
   isOpen: boolean;
@@ -20,6 +21,8 @@ interface MenuModalProps {
   selectedItem: Menu | null;
   restaurantId: string;
   openCart: () => void;
+  targetCart: Cart | null;
+  mutateCart:KeyedMutator<Cart[]>
 }
 
 export default function MenuModal({
@@ -28,18 +31,47 @@ export default function MenuModal({
   closeModal,
   selectedItem,
   restaurantId,
+  targetCart,
+  mutateCart,
 }: MenuModalProps) {
   const [quantity, setQuantity] = useState(1);
-  const handleAddToCart = async() => {
-    if(!selectedItem) return;
+
+  const existingCartItem = targetCart
+    ? (targetCart?.cart_items.find(
+        (item) => item.menus.id === selectedItem?.id,
+      ) ?? null)
+    : null;
+
+  console.log("existingCartItem: ", existingCartItem);
+
+  useEffect(() => {
+    if (!selectedItem) return;
+    setQuantity(existingCartItem?.quantity ?? 1);
+  }, [selectedItem, existingCartItem]);
+
+  const handleAddToCart = async () => {
+    if (!selectedItem) return;
     try {
+      // serverActions呼び出し
       await addToCartAction(selectedItem, quantity, restaurantId);
+      mutateCart((prevCarts: Cart[] | undefined) => {
+        if(!prevCarts) return;
+        if(!targetCart) {
+          // カート新規作成
+        }
+       if(existingCartItem) {
+        // 数量更新
+       } else {
+        // アイテム追加
+       }
+      }, false);
       openCart();
+      closeModal();
     } catch (error) {
       console.error(error);
       alert("エラーが発生しました");
     }
-  }
+  };
 
   return (
     <Dialog
@@ -98,16 +130,15 @@ export default function MenuModal({
                   </select>
                 </div>
 
-                <DialogClose asChild>
                   <Button
                     onClick={handleAddToCart}
                     type="button"
                     size="lg"
                     className="mt-6 h-14 text-lg font-semibold"
                   >
-                    商品を追加（￥{selectedItem.price * quantity}）
+                    {existingCartItem ? "商品を更新" : "商品を追加"}
+                    （￥{selectedItem.price * quantity}）
                   </Button>
-                </DialogClose>
               </div>
             </div>
           </>

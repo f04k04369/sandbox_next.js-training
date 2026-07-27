@@ -31,24 +31,28 @@ export async function addToCartAction(
 
   // 既存のカートが存在しない場合、カートを新規作成＆アイテムを追加
   if (!existingCart) {
-    const { data: newCart, error: newCartError } = await supabase.from("carts").insert({
-      restaurant_id: restaurantId,
-      user_id: user.id,
-    }).select("id").single();
+    const { data: newCart, error: newCartError } = await supabase
+      .from("carts")
+      .insert({
+        restaurant_id: restaurantId,
+        user_id: user.id,
+      })
+      .select("id")
+      .single();
 
     if (newCartError) {
       console.error("カートの作成に失敗しました", newCartError);
       throw new Error("カートの作成に失敗しました");
     }
-    
+
     const newCartId = newCart.id;
 
     // カートの中にアイテムを追加
-    const {error: insertError} = await supabase.from("cart_items").insert({
+    const { error: insertError } = await supabase.from("cart_items").insert({
       quantity: quantity,
       cart_id: newCartId,
       menu_id: selectedItem.id,
-    })
+    });
 
     if (insertError) {
       console.error("アイテムの追加に失敗しました", insertError);
@@ -58,18 +62,82 @@ export async function addToCartAction(
     return;
   }
 
-  // 既存のカートが存在する場合、アイテムを追加 or 数量を更新 
-  const {error: upsertError} = await supabase.from("cart_items").upsert({
-    quantity: quantity,
-    cart_id: existingCart.id,
-    menu_id: selectedItem.id,
-  },{
-    onConflict: "menu_id,cart_id"
-  })
+  // 既存のカートが存在する場合、アイテムを追加 or 数量を更新
+  const { error: upsertError } = await supabase.from("cart_items").upsert(
+    {
+      quantity: quantity,
+      cart_id: existingCart.id,
+      menu_id: selectedItem.id,
+    },
+    {
+      onConflict: "menu_id,cart_id",
+    },
+  );
 
   if (upsertError) {
     console.error("アイテムの追加/更新に失敗しました", upsertError);
     throw new Error("アイテムの追加/更新に失敗しました");
   }
+}
 
+export async function updateCartItemAction(
+  quantity: number,
+  cartItemId: number,
+  cartId: number,
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    redirect("/login");
+  }
+  if (quantity === 0) {
+    // 削除処理
+
+    const { count, error } = await supabase
+      .from("cart_items")
+      .select("*", { count: "exact", head: true })
+      .eq("cart_id", cartId);
+
+    if (error) {
+      console.error("カートの取得に失敗しました", error);
+      throw new Error("カートの取得に失敗しました");
+    }
+    // カート自体を削除
+    if (count === 1) {
+      const { error: deleteCartError } = await supabase
+        .from("carts")
+        .delete()
+        .match({ user_id: user.id, id: cartId });
+
+      if (deleteCartError) {
+        console.error("カートの削除に失敗しました", deleteCartError);
+        throw new Error("カートの削除に失敗しました");
+      }
+      return;
+    }
+
+    const { error: deleteItemError } = await supabase
+      .from("cart_items")
+      .delete()
+      .eq("id", cartItemId);
+    if (deleteItemError) {
+      console.error("カートアイテムの削除に失敗しました", deleteItemError);
+      throw new Error("カートの削除に失敗しました。");
+      return;
+    }
+  }
+  // 数量更新処理
+  const { error: updateError } = await supabase
+    .from("cart_items")
+    .update({ quantity: quantity })
+    .eq("id", cartItemId);
+
+  if (updateError) {
+    console.error("カートアイテムの更新に失敗しました", updateError);
+    throw new Error("カートアイテムの更新に失敗しました");
+  }
 }
