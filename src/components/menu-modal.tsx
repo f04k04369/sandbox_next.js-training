@@ -10,7 +10,7 @@ import {
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { DialogClose } from "@radix-ui/react-dialog";
-import { Cart, Menu } from "@/types";
+import { Cart, CartItem, Menu } from "@/types";
 import { useEffect, useState } from "react";
 import { addToCartAction } from "@/app/(private)/actions/cartActions";
 import { KeyedMutator } from "swr";
@@ -53,25 +53,42 @@ export default function MenuModal({
     if (!selectedItem) return;
     try {
       // serverActions呼び出し
-      await addToCartAction(selectedItem, quantity, restaurantId);
+      const response = await addToCartAction(
+        selectedItem,
+        quantity,
+        restaurantId,
+      );
       mutateCart((prevCarts: Cart[] | undefined) => {
-        if (!prevCarts) return;
-        if (!targetCart) {
-          // カート新規作成
+        if (!prevCarts) return prevCarts;
+
+        if (response.type === "new") {
+          return [...prevCarts, response.cart];
         }
-        if(!targetCart) return;
-        const cart = {...targetCart};
+
+        if (!targetCart) return prevCarts;
+
+        const cart = { ...targetCart };
         if (existingCartItem) {
-          // 数量更新
           cart.cart_items = cart.cart_items.map((item) =>
             item.id === existingCartItem.id
-              ? { ...item, quantity: quantity }
+              ? { ...item, quantity }
               : item,
           );
         } else {
-          // アイテム追加
+          const newCartItem: CartItem = {
+            id: response.id,
+            menus: {
+              id: selectedItem.id,
+              name: selectedItem.name,
+              price: selectedItem.price,
+              photoUrl: selectedItem.photoUrl,
+            },
+            quantity,
+          };
+          cart.cart_items = [...cart.cart_items, newCartItem];
         }
-        return prevCarts.map((c) => c.id ===cart.id ? cart: c)
+
+        return prevCarts.map((c) => (c.id === cart.id ? cart : c));
       }, false);
       openCart();
       closeModal();

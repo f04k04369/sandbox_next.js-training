@@ -1,14 +1,20 @@
 "use server";
+import { toCart } from "@/lib/cart/utils";
+import { getPlaceDetails } from "@/lib/restaurants/api";
 import { createClient } from "@/lib/supabase/server";
-import { Menu } from "@/types";
+import { Cart, Menu, RawCart } from "@/types";
 import { redirect } from "next/navigation";
+
+type addToCartActionResponse = { type: "new", cart: Cart } | {type: "update", id: number} 
 
 export async function addToCartAction(
   selectedItem: Menu,
   quantity: number,
   restaurantId: string,
-) {
+): Promise<addToCartActionResponse> {
   const supabase = await createClient();
+  const bucket = supabase.storage.from("menus");
+
   const {
     data: { user },
     error: userError,
@@ -59,25 +65,76 @@ export async function addToCartAction(
       throw new Error("アイテムの追加に失敗しました");
     }
 
-    return;
+    const { data: insertedCart, error: insertedCartsError } = await supabase
+      .from("carts")
+      .select(
+        `
+      id,
+      restaurant_id,
+      cart_items (
+       id,
+       quantity,
+       menus (
+        id,
+        name,
+        price,
+        image_path
+       )
+      )
+    `,
+      )
+      .match({ user_id: user.id, id: newCartId })
+      .single();
+
+    if (insertedCartsError) {
+      console.error("カートの取得に失敗しました", insertedCartsError);
+      throw new Error(
+        `レストランデータの取得に失敗しました${insertedCartsError}`,
+      );
+    }
+    const { data: restaurantData, error } = await getPlaceDetails(
+      restaurantId,
+      ["displayName", "photos"],
+    );
+
+    if (!restaurantData || error) {
+      throw new Error(`レストランデータの取得に失敗しました${error}`);
+    }
+
+    const getPublicUrl = (imagePath: string) =>
+      bucket.getPublicUrl(imagePath).data.publicUrl;
+
+    const updatedCart = toCart(
+      insertedCart as RawCart,
+      restaurantData,
+      getPublicUrl,
+    );
+
+    return { type: "new", cart: updatedCart };
   }
 
   // 既存のカートが存在する場合、アイテムを追加 or 数量を更新
-  const { error: upsertError } = await supabase.from("cart_items").upsert(
-    {
-      quantity: quantity,
-      cart_id: existingCart.id,
-      menu_id: selectedItem.id,
-    },
-    {
-      onConflict: "menu_id,cart_id",
-    },
-  );
+  const { data, error: upsertError } = await supabase
+    .from("cart_items")
+    .upsert(
+      {
+        quantity: quantity,
+        cart_id: existingCart.id,
+        menu_id: selectedItem.id,
+      },
+      {
+        onConflict: "menu_id,cart_id",
+      },
+    )
+    .select("id")
+    .single();
 
   if (upsertError) {
     console.error("アイテムの追加/更新に失敗しました", upsertError);
     throw new Error("アイテムの追加/更新に失敗しました");
   }
+
+  return { type: "update", id: data.id };
 }
 
 export async function updateCartItemAction(

@@ -20,6 +20,7 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { updateCartItemAction } from "@/app/(private)/actions/cartActions";
+import { KeyedMutator } from "swr";
 
 interface CartSheetProps {
   cart: Cart | null;
@@ -27,6 +28,7 @@ interface CartSheetProps {
   isOpen: boolean;
   closeCart: () => void;
   openCart: () => void;
+  mutateCart: KeyedMutator<Cart[]>;
 }
 
 export default function CartSheet({
@@ -35,26 +37,68 @@ export default function CartSheet({
   isOpen,
   closeCart,
   openCart,
+  mutateCart,
 }: CartSheetProps) {
   const calculateItemTotal = (item: CartItem) =>
     item.quantity * item.menus.price;
 
   const caluculateSubtotal = (cartItem: CartItem[]) =>
     cartItem.reduce((sum, item) => sum + calculateItemTotal(item), 0);
-    
+
   const handleUpdateCartItem = async (value: string, cartItemId: number) => {
-    if(!cart) return;
-    
+    if (!cart) return;
+
     const quantity = Number(value);
 
     try {
-      await updateCartItemAction(quantity, cartItemId, cart.id)
+      await updateCartItemAction(quantity, cartItemId, cart.id);
+      const copyCart = { ...cart };
 
+      if (quantity === 0) {
+        // 削除処理
+        if (cart.cart_items.length === 1) {
+          closeCart();
+          setTimeout(
+            () =>
+              mutateCart(
+                (prevCarts) =>
+                  // カート自体を削除
+                  (prevCarts = prevCarts?.filter((c) => c.id !== cart.id)),
+                false,
+              ),
+            200,
+          );
+          return;
+        }
+
+        // カート内のアイテムを削除
+        copyCart.cart_items = copyCart.cart_items.filter(
+          (cartItem) => cartItem.id !== cartItemId,
+        );
+        mutateCart((prevCarts) =>
+          prevCarts?.map(
+            (cart) => (cart.id === copyCart.id ? copyCart : cart),
+            false,
+          ),
+        );
+        return;
+      }
+
+      // 数量更新
+      copyCart.cart_items = copyCart.cart_items.map((item) =>
+        item.id === cartItemId ? { ...item, quantity } : item,
+      );
+      mutateCart((prevCarts) =>
+        prevCarts?.map(
+          (cart) => (cart.id === copyCart.id ? copyCart : cart),
+          false,
+        ),
+      );
     } catch (error) {
       console.error(error);
-      alert("エラーが発生しました")
+      alert("エラーが発生しました");
     }
-  }
+  };
 
   return (
     <Sheet
@@ -117,14 +161,16 @@ export default function CartSheet({
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <label htmlFor="quantity" className="sr-only">
+                    <label htmlFor={`quantity-${item.id}`} className="sr-only">
                       数量
                     </label>
                     <select
-                      id="quantity"
+                      id={`quantity-${item.id}`}
                       name="quantity"
                       value={item.quantity}
-                      onChange={(e) => handleUpdateCartItem(e.target.value, item.id)}
+                      onChange={(e) =>
+                        handleUpdateCartItem(e.target.value, item.id)
+                      }
                       className="border rounded-full pr-8 pl-4 bg-muted h-9"
                     >
                       <option value="0">削除する</option>

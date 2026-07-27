@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
         )
       `,
       )
-      .eq("user_id", user.id).order("id", {referencedTable: "cart_items", ascending: true});
+      .eq("user_id", user.id)
+      .order("id", { referencedTable: "cart_items", ascending: true });
 
     if (cartsError) {
       console.error("カートの取得に失敗しました", cartsError);
@@ -53,18 +54,20 @@ export async function GET(request: NextRequest) {
 
     console.log("carts", carts);
 
-    const promises = (carts as RawCart[]).map(async (rawCart): Promise<Cart> => {
-      const { data: restaurantData, error } = await getPlaceDetails(
-        rawCart.restaurant_id,
-        ["displayName", "photos"],
-      );
+    const promises = (carts as RawCart[]).map(
+      async (rawCart): Promise<Cart> => {
+        const { data: restaurantData, error } = await getPlaceDetails(
+          rawCart.restaurant_id,
+          ["displayName", "photos"],
+        );
 
-      if (!restaurantData || error) {
-        throw new Error(`レストランデータの取得に失敗しました${error}`);
-      }
+        if (!restaurantData || error) {
+          throw new Error(`レストランデータの取得に失敗しました${error}`);
+        }
 
-      return toCart(rawCart, restaurantData, getPublicUrl);
-    });
+        return toCart(rawCart, restaurantData, getPublicUrl);
+      },
+    );
 
     const results = await Promise.all(promises);
 
