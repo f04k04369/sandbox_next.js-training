@@ -22,7 +22,7 @@ interface MenuModalProps {
   restaurantId: string;
   openCart: () => void;
   targetCart: Cart | null;
-  mutateCart:KeyedMutator<Cart[]>
+  mutateCart: KeyedMutator<Cart[]>;
 }
 
 export default function MenuModal({
@@ -55,15 +55,23 @@ export default function MenuModal({
       // serverActions呼び出し
       await addToCartAction(selectedItem, quantity, restaurantId);
       mutateCart((prevCarts: Cart[] | undefined) => {
-        if(!prevCarts) return;
-        if(!targetCart) {
+        if (!prevCarts) return;
+        if (!targetCart) {
           // カート新規作成
         }
-       if(existingCartItem) {
-        // 数量更新
-       } else {
-        // アイテム追加
-       }
+        if(!targetCart) return;
+        const cart = {...targetCart};
+        if (existingCartItem) {
+          // 数量更新
+          cart.cart_items = cart.cart_items.map((item) =>
+            item.id === existingCartItem.id
+              ? { ...item, quantity: quantity }
+              : item,
+          );
+        } else {
+          // アイテム追加
+        }
+        return prevCarts.map((c) => c.id ===cart.id ? cart: c)
       }, false);
       openCart();
       closeModal();
@@ -130,15 +138,15 @@ export default function MenuModal({
                   </select>
                 </div>
 
-                  <Button
-                    onClick={handleAddToCart}
-                    type="button"
-                    size="lg"
-                    className="mt-6 h-14 text-lg font-semibold"
-                  >
-                    {existingCartItem ? "商品を更新" : "商品を追加"}
-                    （￥{selectedItem.price * quantity}）
-                  </Button>
+                <Button
+                  onClick={handleAddToCart}
+                  type="button"
+                  size="lg"
+                  className="mt-6 h-14 text-lg font-semibold"
+                >
+                  {existingCartItem ? "商品を更新" : "商品を追加"}
+                  （￥{selectedItem.price * quantity}）
+                </Button>
               </div>
             </div>
           </>
