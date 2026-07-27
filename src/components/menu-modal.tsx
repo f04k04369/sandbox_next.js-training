@@ -19,10 +19,12 @@ interface MenuModalProps {
   closeModal: () => void;
   selectedItem: Menu | null;
   restaurantId: string;
+  openCart: () => void;
 }
 
 export default function MenuModal({
   isOpen,
+  openCart,
   closeModal,
   selectedItem,
   restaurantId,
@@ -32,6 +34,7 @@ export default function MenuModal({
     if(!selectedItem) return;
     try {
       await addToCartAction(selectedItem, quantity, restaurantId);
+      openCart();
     } catch (error) {
       console.error(error);
       alert("エラーが発生しました");
