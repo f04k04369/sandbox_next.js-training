@@ -106,6 +106,16 @@ const CartSummary = ({ restaurantId }: CartSummaryProps) => {
     }
   };
 
+  const handleCheckout = async() => {
+    try {
+        await checkoutAction(cart.id)
+
+    } catch (error) {
+        console.error(error);
+        alert("エラーが発生しました");
+    }
+  }
+
   return (
     <Card className="max-w-md min-w-[420px]">
       <CardHeader>
@@ -127,7 +137,7 @@ const CartSummary = ({ restaurantId }: CartSummaryProps) => {
           </div>
           <ChevronRight size={16} />
         </Link>
-        <Button className="cursor-pointer">
+        <Button className="cursor-pointer" onClick={handleCheckout}>
           本ページの内容を確認の上、注文を確定する
         </Button>
       </CardHeader>

@@ -198,3 +198,8 @@ export async function updateCartItemAction(
     throw new Error("カートアイテムの更新に失敗しました");
   }
 }
+
+
+export function checkoutAction(cartId: number) {
+  
+}
