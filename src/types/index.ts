@@ -149,3 +149,25 @@ export type RawCart = {
   restaurant_id: string;
   cart_items: RawCartItem[];
 };
+
+export interface Order {
+  order_items: OrderItem[];
+  restaurantName: string;
+  photoUrl: string;
+  id: number;
+  restaurant_id: string;
+  created_at: string;
+  fee: number;
+  service: number;
+  delivery: number;
+  subtotal_price: number;
+  total_price: number;
+}
+
+export interface OrderItem {
+  photoUrl: string;
+  id: number;
+  price: number;
+  quantity: number;
+  name: string;
+}

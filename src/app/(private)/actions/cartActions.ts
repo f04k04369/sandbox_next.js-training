@@ -5,7 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { Cart, Menu, RawCart } from "@/types";
 import { redirect } from "next/navigation";
 
-type addToCartActionResponse = { type: "new", cart: Cart } | {type: "update", id: number} 
+type addToCartActionResponse =
+  | { type: "new"; cart: Cart }
+  | { type: "update"; id: number };
 
 export async function addToCartAction(
   selectedItem: Menu,
@@ -199,7 +201,97 @@ export async function updateCartItemAction(
   }
 }
 
+export async function checkoutAction(
+  cartId: number,
+  fee: number,
+  service: number,
+  delivery: number,
+) {
+  const supabase = await createClient();
+  // カートデータを取得
+  const { data: cart, error: cartError } = await supabase
+    .from("carts")
+    .select(
+      `
+    id,
+    user_id,
+    restaurant_id,
+    cart_items (
+     id,
+     quantity,
+     menu_id,
+     menus (
+      id,
+      name,
+      price,
+      image_path
+     )
+    )
+  `,
+    )
+    .eq("id", cartId)
+    .single();
 
-export function checkoutAction(cartId: number) {
+  if (cartError) {
+    console.error("カートの取得に失敗しました", cartError);
+    throw new Error("カートの取得に失敗しました");
+  }
+
+  const { restaurant_id, user_id, cart_items } = cart;
+
+  const subtotal = cart_items.reduce((sum, item) => {
+    const menu = Array.isArray(item.menus) ? item.menus[0] : item.menus;
+    return sum + item.quantity * menu.price;
+  }, 0);
+  const total = fee + service + delivery + subtotal;
+
+  // ordersテーブルにデータを挿入
+  const { data: order, error: orderError } = await supabase
+    .from("orders")
+    .insert({
+      restaurant_id: restaurant_id,
+      user_id: user_id,
+      fee,
+      service,
+      delivery,
+      subtotal_price: subtotal,
+      total_price: total,
+    })
+    .select("id")
+    .single();
+  if (orderError) {
+    console.error("注文の作成に失敗しました", cartError);
+    throw new Error("注文の作成に失敗しました");
+  }
+
+  const orderItems = cart_items.map((item) => {
+    const menu = Array.isArray(item.menus) ? item.menus[0] : item.menus;
+
+    return {
+      quantity: item.quantity,
+      order_id: order.id,
+      menu_id: menu.id,
+      price: menu.price,
+      name: menu.name,
+      image_path: menu.image_path,
+    };
+  });
+
+  // order_itemsテーブルにデータを挿入
+
+  const { error: orderItemsError } = await supabase
+    .from("order_items")
+    .insert(orderItems);
+
+  if (orderItemsError) {
+    console.error("注文アイテムの登録に失敗しました", orderItemsError);
+    throw new Error("注文アイテムの登録に失敗しました");
+  }
   
+  // カートデータを削除
+  const {error: deleteError} = await supabase.from("carts").delete().eq("id",cartId);
+  if(deleteError) {
+    console.error("カートの削除に失敗しました",deleteError)
+    throw new Error("カートの削除に失敗しました。")
+  }
 }

@@ -23,7 +23,10 @@ import {
   caluculateSubtotal,
   sumItems,
 } from "@/lib/cart/utils";
-import { updateCartItemAction } from "@/app/(private)/actions/cartActions";
+import {
+  checkoutAction,
+  updateCartItemAction,
+} from "@/app/(private)/actions/cartActions";
 import { useRouter } from "next/navigation";
 
 interface CartSummaryProps {
@@ -73,7 +76,7 @@ const CartSummary = ({ restaurantId }: CartSummaryProps) => {
               (prevCarts = prevCarts?.filter((c) => c.id !== cart.id)),
             false,
           );
-          push(`/restaurant/${cart.restaurant_id}`)
+          push(`/restaurant/${cart.restaurant_id}`);
           return;
         }
 
@@ -106,15 +109,19 @@ const CartSummary = ({ restaurantId }: CartSummaryProps) => {
     }
   };
 
-  const handleCheckout = async() => {
+  const handleCheckout = async () => {
     try {
-        await checkoutAction(cart.id)
-
+      await checkoutAction(cart.id, fee, service, delivery);
+      mutateCart(
+        (prevCarts) => prevCarts?.filter((c) => c.id !== cart.id),
+        false,
+      );
+      push(`/restaurant/${restaurantId}/checkout/complete`)
     } catch (error) {
-        console.error(error);
-        alert("エラーが発生しました");
+      console.error(error);
+      alert("エラーが発生しました");
     }
-  }
+  };
 
   return (
     <Card className="max-w-md min-w-[420px]">

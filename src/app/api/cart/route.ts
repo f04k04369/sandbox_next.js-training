@@ -62,10 +62,18 @@ export async function GET(request: NextRequest) {
         );
 
         if (!restaurantData || error) {
-          throw new Error(`レストランデータの取得に失敗しました${error}`);
+          // throw new Error(`レストランデータの取得に失敗しました${error}`);
+          console.error(`レストランデータの取得に失敗しました${error}`);
         }
 
-        return toCart(rawCart, restaurantData, getPublicUrl);
+        return toCart(
+          rawCart,
+          restaurantData ?? {
+            displayName: "不明なお店",
+            photoUrl: "/no_image.png",
+          },
+          getPublicUrl,
+        );
       },
     );
 

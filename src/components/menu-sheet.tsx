@@ -65,7 +65,7 @@ export default async function MenuSheet() {
             </Link>
           </li>
           <li>
-            <Link href={"orders"} className="flex gap-4 items-center">
+            <Link href={"/orders"} className="flex gap-4 items-center">
               <Heart fill="bg-primary"/>
               <span className="font-bold">ご注文内容</span>
             </Link>
