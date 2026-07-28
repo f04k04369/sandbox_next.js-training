@@ -192,7 +192,7 @@ export default function CartSheet({
             </div>
             <SheetClose asChild>
               <Button asChild>
-                <Link href={`/checkout/${cart.restaurant_id}`}>
+                <Link href={`/restaurant/${cart.restaurant_id}/checkout`}>
                   お会計に進む
                 </Link>
               </Button>
