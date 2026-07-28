@@ -69,6 +69,7 @@ export default function MenuModal({
 
         const cart = { ...targetCart };
         if (existingCartItem) {
+          // 数量更新
           cart.cart_items = cart.cart_items.map((item) =>
             item.id === existingCartItem.id
               ? { ...item, quantity }

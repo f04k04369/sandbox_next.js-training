@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/tooltip";
 import { updateCartItemAction } from "@/app/(private)/actions/cartActions";
 import { KeyedMutator } from "swr";
+import { calculateItemTotal, caluculateSubtotal } from "@/lib/cart/utils";
 
 interface CartSheetProps {
   cart: Cart | null;
@@ -39,11 +40,11 @@ export default function CartSheet({
   openCart,
   mutateCart,
 }: CartSheetProps) {
-  const calculateItemTotal = (item: CartItem) =>
-    item.quantity * item.menus.price;
+  // const calculateItemTotal = (item: CartItem) =>
+  //   item.quantity * item.menus.price;
 
-  const caluculateSubtotal = (cartItem: CartItem[]) =>
-    cartItem.reduce((sum, item) => sum + calculateItemTotal(item), 0);
+  /*   const caluculateSubtotal = (cartItem: CartItem[]) =>
+    cartItem.reduce((sum, item) => sum + calculateItemTotal(item), 0); */
 
   const handleUpdateCartItem = async (value: string, cartItemId: number) => {
     if (!cart) return;

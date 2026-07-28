@@ -22,7 +22,7 @@ export default function MenuContent({
   restaurantId,
 }: MenuContentProps) {
   const { openCart } = useCartVisibility();
-  const { targetCart, mutateCart } = useCart(restaurantId);
+  const { targetCart, mutateCart } = useCart(restaurantId, false);
   const { isOpen, setIsOpen, openModal, closeModal, selectedItem } = useModal();
   const [activeCategoryId, setActiveCategoryId] = useState(categoryMenus[0].id);
   const handleSelectCategory = (categoryId: string) => {

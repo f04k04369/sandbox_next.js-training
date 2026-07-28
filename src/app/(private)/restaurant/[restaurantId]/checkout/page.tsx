@@ -1,11 +1,17 @@
 import AddressModal from "@/components/address-modal";
+import CartSummary from "@/components/cart-summary";
 import PaymentModal from "@/components/payment-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Banknote, Briefcase } from "lucide-react";
 
-export default function CheckoutPage() {
+export default async function CheckoutPage({
+  params,
+}: {
+  params: Promise<{ restaurantId: string }>;
+}) {
+  const { restaurantId } = await params;
   return (
-    <div className="flex gap-4 min-h-[calc(100vh-64px)] p-10">
+    <div className="flex gap-4 p-10">
       {/* 左側エリア */}
       <div className="max-w-3xl space-y-4 flex-1">
         <Card>
@@ -34,7 +40,7 @@ export default function CheckoutPage() {
         </Card>
       </div>
       {/* 右側エリア */}
-      カート情報
+      <CartSummary restaurantId={restaurantId} />
     </div>
   );
 }
